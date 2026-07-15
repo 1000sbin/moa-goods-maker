@@ -18,7 +18,10 @@ jobs:
           - os: windows-latest
             name: Windows
             cmd: npm run dist
-            out: 'dist/*.exe'
+            out: |
+              dist/*.exe
+              dist/latest.yml
+              dist/*.blockmap
           - os: macos-latest
             name: macOS
             cmd: npm run dist:mac
