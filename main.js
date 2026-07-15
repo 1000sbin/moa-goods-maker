@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu } = require('electron');
+const { app, BrowserWindow, Menu, shell } = require('electron');
 const path = require('path');
 
 function createWindow() {
@@ -14,6 +14,11 @@ function createWindow() {
     webPreferences: { contextIsolation: true } // 렌더러에 node 노출 안 함 → ag-psd가 window.agPsd로 로드됨
   });
   Menu.setApplicationMenu(null);
+  // 외부 링크(업데이트 배너·X·메일)는 기본 브라우저로 — 앱 창이 납치되지 않게
+  win.webContents.setWindowOpenHandler(({ url }) => {
+    if (/^https?:/.test(url) || url.startsWith('mailto:')) shell.openExternal(url);
+    return { action: 'deny' };
+  });
   win.loadFile(path.join(__dirname, 'app', 'index.html'));
   // 저장(다운로드) 시 setSavePath를 호출하지 않으므로 Electron 기본 "다른 이름으로 저장" 창이 뜸
 }
