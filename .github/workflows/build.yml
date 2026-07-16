@@ -78,6 +78,29 @@ jobs:
           done
           [ "$FOUND" = "1" ] || { echo "★ 앱을 찾지 못함"; exit 1; }
 
+      - name: 맥 실행 스모크 테스트 (시작 직후 SIGTRAP 방지)
+        if: matrix.name == 'macOS'
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "macOS runner: $(sw_vers -productVersion) ($(uname -m))"
+          APP=$(find dist/mac* -name "*.app" -type d | head -1)
+          BIN=$(find "$APP/Contents/MacOS" -type f | head -1)
+          echo "Launch: $BIN"
+          "$BIN" &
+          PID=$!
+          for i in 1 2 3 4 5 6 7 8; do
+            sleep 1
+            if ! kill -0 "$PID" 2>/dev/null; then
+              echo "★ $i초 만에 프로세스 종료 — ElectronMain/V8 SIGTRAP 가능"
+              wait "$PID" || true
+              exit 1
+            fi
+          done
+          echo "  8초 실행 유지 ✓"
+          kill "$PID" 2>/dev/null || true
+          wait "$PID" 2>/dev/null || true
+
       - name: 아티팩트 업로드 (태그 없이 수동 실행 시)
         uses: actions/upload-artifact@v4
         with:
