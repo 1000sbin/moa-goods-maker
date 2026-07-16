@@ -56,17 +56,25 @@ jobs:
       - name: 애플 서명·공증 자격 준비 (맥 전용)
         if: matrix.name == 'macOS'
         shell: bash
+        env:
+          APPLE_API_KEY_CONTENT: ${{ secrets.APPLE_API_KEY }}
+          CSC_LINK_RAW: ${{ secrets.CSC_LINK }}
         run: |
           mkdir -p "$RUNNER_TEMP/apple"
-          printf '%s' "${{ secrets.APPLE_API_KEY }}" > "$RUNNER_TEMP/apple/AuthKey.p8"
+          # .p8은 원래 여러 줄 — 파일로만 쓰고 경로를 넘김
+          printf '%s\n' "$APPLE_API_KEY_CONTENT" > "$RUNNER_TEMP/apple/AuthKey.p8"
+          # base64는 줄바꿈이 섞여 있을 수 있음 → 공백·줄바꿈 제거해 한 줄로 정규화
+          CSC_ONELINE=$(printf '%s' "$CSC_LINK_RAW" | tr -d ' \r\n')
           {
             echo "APPLE_API_KEY=$RUNNER_TEMP/apple/AuthKey.p8"
             echo "APPLE_API_KEY_ID=${{ secrets.APPLE_API_KEY_ID }}"
             echo "APPLE_API_ISSUER=${{ secrets.APPLE_API_ISSUER }}"
-            echo "CSC_LINK=${{ secrets.CSC_LINK }}"
-            echo "CSC_KEY_PASSWORD=${{ secrets.CSC_KEY_PASSWORD }}"
+            echo "CSC_LINK=$CSC_ONELINE"
+            echo "CSC_KEY_PASSWORD<<MOAEOF"
+            printf '%s\n' "${{ secrets.CSC_KEY_PASSWORD }}"
+            echo "MOAEOF"
           } >> "$GITHUB_ENV"
-          echo "자격 준비 완료 (값은 마스킹됨)"
+          echo "자격 준비 완료 — p8 $(wc -c < "$RUNNER_TEMP/apple/AuthKey.p8") bytes / b64 ${#CSC_ONELINE} chars"
 
       - name: 빌드
         run: ${{ matrix.cmd }}
