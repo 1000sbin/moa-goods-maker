@@ -1,6 +1,6 @@
 {
   "name": "moa-goods-maker",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "description": "모아 굿즈메이커 — 아크릴 키링/스탠드/코롯토/스티커 칼선·타공 자동 생성",
   "main": "main.js",
   "author": "modi",
@@ -16,8 +16,8 @@
     "electron-updater": "^6.8.9"
   },
   "devDependencies": {
-    "electron": "^31.7.6",
-    "electron-builder": "^24.13.3"
+    "electron": "^42.7.0",
+    "electron-builder": "^26.15.3"
   },
   "build": {
     "appId": "net.ivyro.loading0now.moagoodsmaker",
