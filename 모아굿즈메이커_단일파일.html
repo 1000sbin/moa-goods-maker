@@ -22129,7 +22129,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   <a id="updGo" href="#" target="_blank" rel="noopener" class="upd-btn">받으러 가기</a>
   <button id="updLater" class="upd-x" title="나중에">✕</button>
 </div>
-<footer class="credit"><span style="opacity:.55">모아 굿즈메이커 v1.4.9</span> · 오픈소스 고지: CREDITS.md · © 2026 Modi · X <a href="https://x.com/Modi_ing" target="_blank" rel="noopener">@Modi_ing</a> · 문의 <a href="mailto:1000sbin@gmail.com">1000sbin@gmail.com</a></footer>
+<footer class="credit"><span style="opacity:.55">모아 굿즈메이커 v1.5.0</span> · 오픈소스 고지: CREDITS.md · © 2026 Modi · X <a href="https://x.com/Modi_ing" target="_blank" rel="noopener">@Modi_ing</a> · 문의 <a href="mailto:1000sbin@gmail.com">1000sbin@gmail.com</a></footer>
 <span class="spin" id="spin">🍓 칼선 계산 중…</span>
 <div class="modal-bg" id="shapeModalBg">
   <div class="modal">
@@ -23608,8 +23608,8 @@ async function saveBlob(blob,name){ // 폴더 지정 시 그 폴더로, 아니�
   dl(URL.createObjectURL(blob),name);
 }
 const REPO='1000sbin/moa-goods-maker'; // 업데이트 확인용 저장소
-const APP_VER='1.4.9'; // 배포 시 버전 배지와 함께 갱신
-function verCmp(a,b){ // 'v1.4.9' vs '1.4.6' → 1/0/-1
+const APP_VER='1.5.0'; // 배포 시 버전 배지와 함께 갱신
+function verCmp(a,b){ // 'v1.5.0' vs '1.4.6' → 1/0/-1
   const pa=String(a).replace(/^v/,'').split('.').map(n=>parseInt(n)||0);
   const pb=String(b).replace(/^v/,'').split('.').map(n=>parseInt(n)||0);
   for(let i=0;i<Math.max(pa.length,pb.length);i++){

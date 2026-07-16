@@ -1,6 +1,6 @@
 {
   "name": "moa-goods-maker",
-  "version": "1.4.9",
+  "version": "1.5.0",
   "description": "모아 굿즈메이커 — 아크릴 키링/스탠드/코롯토/스티커 칼선·타공 자동 생성",
   "main": "main.js",
   "author": "modi",
@@ -11,6 +11,9 @@
     "dist:portable": "electron-builder --win portable",
     "dist:mac": "electron-builder --mac",
     "dist:linux": "electron-builder --linux"
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.9"
   },
   "devDependencies": {
     "electron": "^31.7.6",
@@ -25,21 +28,30 @@
     "files": [
       "main.js",
       "app/**/*",
-      "build/**/*"
+      "build/icon.*",
+      "package.json",
+      "node_modules/**/*",
+      "!node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",
+      "!node_modules/*/{test,__tests__,tests,powered-test,example,examples}",
+      "!node_modules/*.d.ts",
+      "!**/*.map"
+    ],
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "1000sbin",
+        "repo": "moa-goods-maker"
+      }
     ],
     "win": {
       "target": [
         {
           "target": "nsis",
-          "arch": [
-            "x64"
-          ]
+          "arch": ["x64"]
         },
         {
           "target": "portable",
-          "arch": [
-            "x64"
-          ]
+          "arch": ["x64"]
         }
       ],
       "icon": "build/icon.ico"
@@ -56,41 +68,26 @@
       "target": [
         {
           "target": "dmg",
-          "arch": [
-            "universal"
-          ]
+          "arch": ["universal"]
         },
         {
           "target": "zip",
-          "arch": [
-            "universal"
-          ]
+          "arch": ["universal"]
         }
       ],
       "icon": "build/icon.icns",
       "category": "public.app-category.graphics-design",
-      "artifactName": "모아굿즈메이커-${version}-${arch}.${ext}"
+      "artifactName": "모아굿즈메이커-${version}-${arch}.${ext}",
+      "identity": null
     },
     "dmg": {
       "artifactName": "모아굿즈메이커-${version}-${arch}.dmg"
     },
     "linux": {
-      "target": [
-        "AppImage"
-      ],
+      "target": ["AppImage"],
       "icon": "build/icon.png",
       "category": "Graphics",
       "artifactName": "모아굿즈메이커-${version}.${ext}"
-    },
-    "publish": [
-      {
-        "provider": "github",
-        "owner": "1000sbin",
-        "repo": "moa-goods-maker"
-      }
-    ]
-  },
-  "dependencies": {
-    "electron-updater": "^6.8.9"
+    }
   }
 }
