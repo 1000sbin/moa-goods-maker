@@ -48,6 +48,11 @@ jobs:
       - name: 의존성 설치
         run: npm install
 
+      - name: 웹 단일파일 ASCII 사본 (깃허브가 한글 파일명을 지우는 문제 대응)
+        if: matrix.name == 'Windows'
+        shell: bash
+        run: cp 모아굿즈메이커_단일파일.html MoaGoodsMaker-web.html
+
       - name: 빌드
         run: ${{ matrix.cmd }}
         env:
@@ -62,13 +67,20 @@ jobs:
         if: matrix.name == 'macOS'
         shell: bash
         run: |
-          APP=$(find dist/mac-universal -maxdepth 1 -name "*.app" | head -1)
+          APP=$(find dist -maxdepth 2 -name "*.app" -type d | head -1)
           echo "검사 대상: $APP"
-          codesign -dv "$APP" 2>&1 || { echo "★ 서명 없음 — 실패"; exit 1; }
-          # 두 아키텍처 모두 서명됐는지 (v1.4.9는 x86_64가 무서명이라 맥에서 즉시 종료됐음)
-          BIN="$APP/Contents/MacOS/$(defaults read "$PWD/$APP/Contents/Info" CFBundleExecutable)"
+          # 한글 경로는 find로 그대로 획득 (NFC/NFD 조립 금지)
+          BIN=$(find "$APP/Contents/MacOS" -type f | head -1)
+          echo "바이너리: $BIN"
+          codesign -dv "$APP" 2>&1 || { echo "★ 앱 서명 없음 — 실패"; exit 1; }
+          # 아키텍처별 검사: lipo로 슬라이스 분리 후 각각 codesign (v1.4.9는 x86_64가 무서명이라 맥에서 즉시 종료됐음)
           for ARCH in x86_64 arm64; do
-            codesign -dv --arch=$ARCH "$BIN" 2>&1 && echo "  $ARCH 서명 ✓" || { echo "★ $ARCH 무서명 — 실패"; exit 1; }
+            lipo -thin $ARCH -output "/tmp/thin_$ARCH" "$BIN"
+            if codesign -dv "/tmp/thin_$ARCH" 2>&1; then
+              echo "  $ARCH 서명 ✓"
+            else
+              echo "★ $ARCH 무서명 — 실패"; exit 1
+            fi
           done
 
       - name: 아티팩트 업로드 (태그 없이 수동 실행 시)
@@ -84,16 +96,16 @@ jobs:
         with:
           files: |
             ${{ matrix.out }}
-            ${{ matrix.name == 'Windows' && '모아굿즈메이커_단일파일.html' || '' }}
+            ${{ matrix.name == 'Windows' && 'MoaGoodsMaker-web.html' || '' }}
           generate_release_notes: true
           body: |
             ## 모아 굿즈메이커 ${{ github.ref_name }}
 
             ### 내려받기
-            - **Windows**: `모아굿즈메이커-Setup-*.exe` (설치판) 또는 `모아굿즈메이커-portable-*.exe` (무설치)
-            - **macOS**: `모아굿즈메이커-*.dmg` (Intel·Apple Silicon 공용)
-            - **Linux**: `모아굿즈메이커-*.AppImage`
-            - **웹 버전**: 아래 Assets의 `모아굿즈메이커_단일파일.html` — 브라우저로 바로 열기
+            - **Windows**: `MoaGoodsMaker-Setup-*.exe` (설치판) 또는 `MoaGoodsMaker-portable-*.exe` (무설치)
+            - **macOS**: `MoaGoodsMaker-*.dmg` (Intel·Apple Silicon 공용)
+            - **Linux**: `MoaGoodsMaker-*.AppImage`
+            - **웹 버전**: 아래 Assets의 `MoaGoodsMaker-web.html` — 브라우저로 바로 열기
 
             ### macOS 첫 실행 안내
             애플 인증서 없이 빌드된 앱이라 첫 실행이 막힐 수 있어요. 순서대로:

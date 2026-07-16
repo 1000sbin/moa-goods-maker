@@ -47,47 +47,57 @@
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         },
         {
           "target": "portable",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "icon": "build/icon.ico"
     },
     "portable": {
-      "artifactName": "모아굿즈메이커-portable-${version}.exe"
+      "artifactName": "MoaGoodsMaker-portable-${version}.exe"
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
-      "artifactName": "모아굿즈메이커-Setup-${version}.exe"
+      "artifactName": "MoaGoodsMaker-Setup-${version}.exe"
     },
     "mac": {
       "target": [
         {
           "target": "dmg",
-          "arch": ["universal"]
+          "arch": [
+            "universal"
+          ]
         },
         {
           "target": "zip",
-          "arch": ["universal"]
+          "arch": [
+            "universal"
+          ]
         }
       ],
       "icon": "build/icon.icns",
       "category": "public.app-category.graphics-design",
-      "artifactName": "모아굿즈메이커-${version}-${arch}.${ext}",
+      "artifactName": "MoaGoodsMaker-${version}-${arch}.${ext}",
       "identity": "-"
     },
     "dmg": {
-      "artifactName": "모아굿즈메이커-${version}-${arch}.dmg"
+      "artifactName": "MoaGoodsMaker-${version}-${arch}.dmg"
     },
     "linux": {
-      "target": ["AppImage"],
+      "target": [
+        "AppImage"
+      ],
       "icon": "build/icon.png",
       "category": "Graphics",
-      "artifactName": "모아굿즈메이커-${version}.${ext}"
+      "artifactName": "MoaGoodsMaker-${version}.${ext}"
     }
   }
 }
