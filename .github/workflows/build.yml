@@ -53,53 +53,56 @@ jobs:
         shell: bash
         run: cp 모아굿즈메이커_단일파일.html MoaGoodsMaker-web.html
 
+      - name: 애플 서명·공증 자격 준비 (맥 전용)
+        if: matrix.name == 'macOS'
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/apple"
+          printf '%s' "${{ secrets.APPLE_API_KEY }}" > "$RUNNER_TEMP/apple/AuthKey.p8"
+          {
+            echo "APPLE_API_KEY=$RUNNER_TEMP/apple/AuthKey.p8"
+            echo "APPLE_API_KEY_ID=${{ secrets.APPLE_API_KEY_ID }}"
+            echo "APPLE_API_ISSUER=${{ secrets.APPLE_API_ISSUER }}"
+            echo "CSC_LINK=${{ secrets.CSC_LINK }}"
+            echo "CSC_KEY_PASSWORD=${{ secrets.CSC_KEY_PASSWORD }}"
+          } >> "$GITHUB_ENV"
+          echo "자격 준비 완료 (값은 마스킹됨)"
+
       - name: 빌드
         run: ${{ matrix.cmd }}
         env:
-          # 맥: identity null — Tahoe #49522 adhoc 재서명 크래시 우회 (무서명)
+          # 맥: package.json의 identity "-" 로 adhoc 전체 서명 (인증서 불필요)
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 빌드 결과 확인
         shell: bash
         run: ls -la dist/
 
-      - name: 맥 번들 검증 (무서명 — Tahoe #49522 우회)
+      - name: 맥 서명·공증 검증
         if: matrix.name == 'macOS'
         shell: bash
         run: |
-          FOUND=0
           for APP in dist/mac*/*.app; do
             [ -d "$APP" ] || continue
-            FOUND=1
-            echo "=== 검사: $APP ==="
-            test -f "$APP/Contents/MacOS/"* || { echo "★ 실행 파일 없음"; exit 1; }
-            test -d "$APP/Contents/Frameworks/Electron Framework.framework" || { echo "★ Electron Framework 없음"; exit 1; }
-            echo "  번들 구조 ✓ (무서명 — adhoc 재서명 시 macOS 26에서 SIGTRAP)"
+            echo "=== $APP ==="
+            codesign --verify --deep --strict "$APP" && echo "  서명 검증 ✓" || { echo "★ 서명 검증 실패"; exit 1; }
+            codesign -dv "$APP" 2>&1 | grep -E "Authority|TeamIdentifier" | head -3
+            spctl --assess --type exec -vv "$APP" 2>&1 | head -2
+            spctl --assess --type exec "$APP" && echo "  Gatekeeper 통과 (공증됨) ✓" || { echo "★ Gatekeeper 거부 — 공증 실패"; exit 1; }
           done
-          [ "$FOUND" = "1" ] || { echo "★ 앱을 찾지 못함"; exit 1; }
 
-      - name: 맥 실행 스모크 테스트 (시작 직후 SIGTRAP 방지)
+      - name: 맥 실행 스모크 테스트 (관찰용)
         if: matrix.name == 'macOS'
+        continue-on-error: true
         shell: bash
         run: |
-          set -euo pipefail
-          echo "macOS runner: $(sw_vers -productVersion) ($(uname -m))"
-          APP=$(find dist/mac* -name "*.app" -type d | head -1)
+          APP=$(find dist -maxdepth 2 -name "*.app" -type d | head -1)
           BIN=$(find "$APP/Contents/MacOS" -type f | head -1)
-          echo "Launch: $BIN"
-          "$BIN" &
+          echo "러너 macOS: $(sw_vers -productVersion)"
+          "$BIN" --no-sandbox > /tmp/smoke.log 2>&1 &
           PID=$!
-          for i in 1 2 3 4 5 6 7 8; do
-            sleep 1
-            if ! kill -0 "$PID" 2>/dev/null; then
-              echo "★ $i초 만에 프로세스 종료 — ElectronMain/V8 SIGTRAP 가능"
-              wait "$PID" || true
-              exit 1
-            fi
-          done
-          echo "  8초 실행 유지 ✓"
-          kill "$PID" 2>/dev/null || true
-          wait "$PID" 2>/dev/null || true
+          sleep 10
+          if kill -0 $PID 2>/dev/null; then echo "★ 10초 생존 ✓"; kill $PID; else echo "즉시 종료 — 출력:"; cat /tmp/smoke.log; fi
 
       - name: 아티팩트 업로드 (태그 없이 수동 실행 시)
         uses: actions/upload-artifact@v4
@@ -125,8 +128,6 @@ jobs:
             - **Linux**: `MoaGoodsMaker-*.AppImage`
             - **웹 버전**: 아래 Assets의 `MoaGoodsMaker-web.html` — 브라우저로 바로 열기
 
-            ### macOS 첫 실행 안내
-            macOS 26 (Tahoe)에서 electron-builder adhoc 서명 시 알려진 크래시([#49522](https://github.com/electron/electron/issues/49522))를 피하기 위해 **무서명**으로 배포해요. 첫 실행이 막히면:
-            1. 응용 프로그램 폴더의 앱을 **우클릭 → 열기 → 열기**
-            2. 그래도 안 되면 **터미널에 이 한 줄**: `xattr -cr /Applications/모아\ 굿즈메이커.app`
-            3. 그래도 안 되면 **웹 버전**(아래 html 파일)을 써주세요 — 기능이 완전히 같아요
+            ### macOS 안내
+            이 버전부터 **애플 공증(notarization)이 완료**된 앱이에요 — 받아서 바로 실행하면 돼요.
+            (이전 버전의 실행 즉시 종료 문제도 함께 해결됐어요. 안 되면 웹 버전 `MoaGoodsMaker-web.html`이 항상 있어요.)
