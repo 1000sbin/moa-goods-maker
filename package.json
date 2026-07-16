@@ -1,6 +1,6 @@
 {
   "name": "moa-goods-maker",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "모아 굿즈메이커 — 아크릴 키링/스탠드/코롯토/스티커 칼선·타공 자동 생성",
   "main": "main.js",
   "author": "modi",
@@ -78,7 +78,7 @@
       "icon": "build/icon.icns",
       "category": "public.app-category.graphics-design",
       "artifactName": "모아굿즈메이커-${version}-${arch}.${ext}",
-      "identity": null
+      "identity": "-"
     },
     "dmg": {
       "artifactName": "모아굿즈메이커-${version}-${arch}.dmg"

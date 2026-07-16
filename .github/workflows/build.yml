@@ -51,13 +51,25 @@ jobs:
       - name: 빌드
         run: ${{ matrix.cmd }}
         env:
-          # 맥 코드 서명 없이 빌드 (인증서 없어도 dmg 생성됨)
-          CSC_IDENTITY_AUTO_DISCOVERY: false
+          # 맥: package.json의 identity "-" 로 adhoc 전체 서명 (인증서 불필요)
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 빌드 결과 확인
         shell: bash
         run: ls -la dist/
+
+      - name: 맥 서명 검증 (adhoc 전체 서명 확인)
+        if: matrix.name == 'macOS'
+        shell: bash
+        run: |
+          APP=$(find dist/mac-universal -maxdepth 1 -name "*.app" | head -1)
+          echo "검사 대상: $APP"
+          codesign -dv "$APP" 2>&1 || { echo "★ 서명 없음 — 실패"; exit 1; }
+          # 두 아키텍처 모두 서명됐는지 (v1.4.9는 x86_64가 무서명이라 맥에서 즉시 종료됐음)
+          BIN="$APP/Contents/MacOS/$(defaults read "$PWD/$APP/Contents/Info" CFBundleExecutable)"
+          for ARCH in x86_64 arm64; do
+            codesign -dv --arch=$ARCH "$BIN" 2>&1 && echo "  $ARCH 서명 ✓" || { echo "★ $ARCH 무서명 — 실패"; exit 1; }
+          done
 
       - name: 아티팩트 업로드 (태그 없이 수동 실행 시)
         uses: actions/upload-artifact@v4
