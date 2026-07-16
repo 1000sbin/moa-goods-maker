@@ -74,6 +74,7 @@ jobs:
             echo "=== 검사: $APP ==="
             codesign -dv "$APP" 2>&1 || { echo "★ 서명 없음 — 실패"; exit 1; }
             codesign --verify --deep "$APP" 2>&1 && echo "  검증 통과 ✓" || { echo "★ 서명 검증 실패"; exit 1; }
+            codesign -d --entitlements - "$APP" 2>&1 | grep -q "allow-jit" && echo "  JIT entitlements ✓" || { echo "★ JIT 권한 누락"; exit 1; }
           done
           [ "$FOUND" = "1" ] || { echo "★ 앱을 찾지 못함"; exit 1; }
 

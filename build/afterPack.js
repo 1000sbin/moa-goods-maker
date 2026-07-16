@@ -1,11 +1,8 @@
-// 맥 adhoc 서명 훅 — electron-builder가 인증서 없이는 서명을 건너뛰므로 직접 수행.
-// v1.4.9에서 x86_64 슬라이스가 무서명이라 맥에서 실행 즉시 종료됐던 문제의 해결책.
-//
-// 중요: universal 빌드는 x64/arm64를 각각 만든 뒤(-temp 폴더) 병합하는데,
-// temp 단계에서 서명하면 두 빌드의 서명 파일이 달라져 병합이 실패함
-// ("Expected all non-binary files to have identical SHAs").
-// → 병합이 끝난 '최종 universal 앱'만 서명한다. codesign은 fat 바이너리의
-//   모든 아키텍처 슬라이스를 한 번에 서명하므로 결과는 동일.
+// 맥 adhoc 서명 훅 — 인증서 없이 전체 아키텍처 서명 + JIT entitlements.
+// entitlements가 핵심: V8은 시작 직후 JIT용 메모리(쓰기+실행)를 요구하는데,
+// 공증 없는 앱에서 이 권한이 없으면 macOS가 막아 V8 스냅샷 단계에서 SIGTRAP.
+// (인텔 iMac + macOS 26 제보 — Electron 31/42, universal/x64 모두 같은 자리에서
+//  죽고 디스코드(공증+JIT권한 보유)는 정상인 것이 근거)
 const { execSync } = require('child_process');
 const path = require('path');
 
@@ -17,8 +14,9 @@ exports.default = async function afterPack(context) {
   }
   const appName = context.packager.appInfo.productFilename;
   const appPath = path.join(context.appOutDir, `${appName}.app`);
-  console.log(`[afterPack] adhoc 서명 (최종 universal): ${appPath}`);
-  execSync(`codesign --force --deep --sign - "${appPath}"`, { stdio: 'inherit' });
-  execSync(`codesign -dv "${appPath}"`, { stdio: 'inherit' });
+  const ent = path.join(__dirname, 'entitlements.plist');
+  console.log(`[afterPack] adhoc 서명 + JIT entitlements: ${appPath}`);
+  execSync(`codesign --force --deep --sign - --entitlements "${ent}" "${appPath}"`, { stdio: 'inherit' });
+  execSync(`codesign -d --entitlements - "${appPath}"`, { stdio: 'inherit' }); // 권한 실렸는지 출력
   console.log('[afterPack] 서명 완료');
 };
