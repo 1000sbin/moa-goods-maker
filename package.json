@@ -86,7 +86,7 @@
       "icon": "build/icon.icns",
       "category": "public.app-category.graphics-design",
       "artifactName": "MoaGoodsMaker-${version}-${arch}.${ext}",
-      "identity": "-"
+      "identity": null
     },
     "dmg": {
       "artifactName": "MoaGoodsMaker-${version}-${arch}.dmg"
@@ -98,6 +98,7 @@
       "icon": "build/icon.png",
       "category": "Graphics",
       "artifactName": "MoaGoodsMaker-${version}.${ext}"
-    }
+    },
+    "afterPack": "build/afterPack.js"
   }
 }
