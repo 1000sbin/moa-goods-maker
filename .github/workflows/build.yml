@@ -63,25 +63,19 @@ jobs:
         shell: bash
         run: ls -la dist/
 
-      - name: 맥 서명 검증 (adhoc 전체 서명 확인)
+      - name: 맥 서명 검증 (모든 아키텍처 빌드)
         if: matrix.name == 'macOS'
         shell: bash
         run: |
-          APP=$(find dist -maxdepth 2 -name "*.app" -type d | head -1)
-          echo "검사 대상: $APP"
-          # 한글 경로는 find로 그대로 획득 (NFC/NFD 조립 금지)
-          BIN=$(find "$APP/Contents/MacOS" -type f | head -1)
-          echo "바이너리: $BIN"
-          codesign -dv "$APP" 2>&1 || { echo "★ 앱 서명 없음 — 실패"; exit 1; }
-          # 아키텍처별 검사: lipo로 슬라이스 분리 후 각각 codesign (v1.4.9는 x86_64가 무서명이라 맥에서 즉시 종료됐음)
-          for ARCH in x86_64 arm64; do
-            lipo -thin $ARCH -output "/tmp/thin_$ARCH" "$BIN"
-            if codesign -dv "/tmp/thin_$ARCH" 2>&1; then
-              echo "  $ARCH 서명 ✓"
-            else
-              echo "★ $ARCH 무서명 — 실패"; exit 1
-            fi
+          FOUND=0
+          for APP in dist/mac*/*.app; do
+            [ -d "$APP" ] || continue
+            FOUND=1
+            echo "=== 검사: $APP ==="
+            codesign -dv "$APP" 2>&1 || { echo "★ 서명 없음 — 실패"; exit 1; }
+            codesign --verify --deep "$APP" 2>&1 && echo "  검증 통과 ✓" || { echo "★ 서명 검증 실패"; exit 1; }
           done
+          [ "$FOUND" = "1" ] || { echo "★ 앱을 찾지 못함"; exit 1; }
 
       - name: 아티팩트 업로드 (태그 없이 수동 실행 시)
         uses: actions/upload-artifact@v4
@@ -103,7 +97,7 @@ jobs:
 
             ### 내려받기
             - **Windows**: `MoaGoodsMaker-Setup-*.exe` (설치판) 또는 `MoaGoodsMaker-portable-*.exe` (무설치)
-            - **macOS**: `MoaGoodsMaker-*.dmg` (Intel·Apple Silicon 공용)
+            - **macOS**: 칩에 맞게 — Apple Silicon(M1~M4)은 `MoaGoodsMaker-*-arm64.dmg`, Intel 맥은 `MoaGoodsMaker-*-x64.dmg`
             - **Linux**: `MoaGoodsMaker-*.AppImage`
             - **웹 버전**: 아래 Assets의 `MoaGoodsMaker-web.html` — 브라우저로 바로 열기
 
