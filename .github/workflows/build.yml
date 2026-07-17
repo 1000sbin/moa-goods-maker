@@ -99,18 +99,27 @@ jobs:
             spctl --assess --type exec "$APP" && echo "  Gatekeeper 통과 (공증됨) ✓" || { echo "★ Gatekeeper 거부 — 공증 실패"; exit 1; }
           done
 
-      - name: 맥 실행 스모크 테스트 (관찰용)
+      - name: 맥 실행 스모크 테스트 (공증 빌드 그대로)
         if: matrix.name == 'macOS'
-        continue-on-error: true
         shell: bash
         run: |
+          set -euo pipefail
           APP=$(find dist -maxdepth 2 -name "*.app" -type d | head -1)
           BIN=$(find "$APP/Contents/MacOS" -type f | head -1)
-          echo "러너 macOS: $(sw_vers -productVersion)"
-          "$BIN" --no-sandbox > /tmp/smoke.log 2>&1 &
+          echo "러너 macOS: $(sw_vers -productVersion) ($(uname -m))"
+          "$BIN" > /tmp/smoke.log 2>&1 &
           PID=$!
-          sleep 10
-          if kill -0 $PID 2>/dev/null; then echo "★ 10초 생존 ✓"; kill $PID; else echo "즉시 종료 — 출력:"; cat /tmp/smoke.log; fi
+          for i in 1 2 3 4 5 6 7 8 9 10; do
+            sleep 1
+            if ! kill -0 "$PID" 2>/dev/null; then
+              echo "★ ${i}초 만에 종료 — Tahoe/Electron 충돌 가능"
+              cat /tmp/smoke.log || true
+              exit 1
+            fi
+          done
+          echo "  10초 실행 유지 ✓"
+          kill "$PID" 2>/dev/null || true
+          wait "$PID" 2>/dev/null || true
 
       - name: 아티팩트 업로드 (태그 없이 수동 실행 시)
         uses: actions/upload-artifact@v4
@@ -137,5 +146,6 @@ jobs:
             - **웹 버전**: 아래 Assets의 `MoaGoodsMaker-web.html` — 브라우저로 바로 열기
 
             ### macOS 안내
-            이 버전부터 **애플 공증(notarization)이 완료**된 앱이에요 — 받아서 바로 실행하면 돼요.
-            (이전 버전의 실행 즉시 종료 문제도 함께 해결됐어요. 안 되면 웹 버전 `MoaGoodsMaker-web.html`이 항상 있어요.)
+            **애플 공증(notarization) 완료** — 받아서 바로 실행하면 돼요.
+            v1.5.8: macOS 26 (Tahoe)에서 Chromium 샌드박스·GPU 충돌 우회 (`bootstrap.js` + 소프트웨어 렌더링).
+            안 되면 `%TEMP%\\moa-goods-maker-boot.log`(Win) 또는 `/tmp/moa-goods-maker-boot.log`(Mac)를 개발자에게 보내주세요.
