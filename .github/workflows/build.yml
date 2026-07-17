@@ -147,5 +147,5 @@ jobs:
 
             ### macOS 안내
             **애플 공증(notarization) 완료** — 받아서 바로 실행하면 돼요.
-            v1.5.8: macOS 26 (Tahoe)에서 Chromium 샌드박스·GPU 충돌 우회 (`bootstrap.js` + 소프트웨어 렌더링).
-            안 되면 `%TEMP%\\moa-goods-maker-boot.log`(Win) 또는 `/tmp/moa-goods-maker-boot.log`(Mac)를 개발자에게 보내주세요.
+            v1.5.11: Intel Mac + macOS 26 (Tahoe)에서 시작 즉시 종료되는 크래시(V8 스냅샷 초기화 SIGTRAP) 대응으로 **Electron을 42 → 39.8.10으로 교체**했어요.
+            그래도 안 되면 `~/Library/Logs/DiagnosticReports/`의 최신 `.ips` 파일을 개발자(X @Modi_ing)에게 보내주세요.
