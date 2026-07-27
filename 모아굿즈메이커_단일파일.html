@@ -21932,6 +21932,13 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
           <label class="row">그림 실물 폭(mm) <span class="tip" data-tip="투명을 뺀 그림 영역의 목표 실물 크기예요. 값을 바꾸면 해상도(DPI)가 자동 역산돼 모든 출력에 반영돼요. 픽셀은 그대로라 화질 손실이 없어요.">?</span> <input type="number" id="targetW" min="5" max="1000" step="0.1" style="width:76px"></label>
           <label class="row">그림 실물 높이(mm) <input type="number" id="targetH" min="5" max="1000" step="0.1" style="width:76px"></label>
           <label class="row">해상도(DPI) <input type="number" id="dpi" value="300" min="72" max="1200"> <select id="dpiPreset" style="width:74px"><option value="">직접</option><option>300</option><option>350</option><option>400</option><option>600</option></select></label>
+          <label class="row">그림 회전(°) <span class="tip" data-tip="원본을 돌려요. 칼선·화이트·타공이 전부 같이 따라와요. 90/180/270°는 픽셀을 다시 계산하지 않아 원본과 완전히 같고, 그 밖의 각도는 외곽 1px 정도만 다시 그려져요. 각도를 바꿀 때마다 항상 원본에서 새로 돌리니 여러 번 돌려도 화질이 나빠지지 않아요.">?</span> <input type="number" id="rot" value="0" min="-180" max="180" step="0.5" style="width:72px"></label>
+          <input type="range" id="rotSl" min="-180" max="180" value="0" step="0.5">
+          <div class="row" style="gap:6px;margin-top:4px">
+            <button class="btn ghost" id="rotL">↺ 90°</button>
+            <button class="btn ghost" id="rotR">↻ 90°</button>
+            <button class="btn ghost" id="rotZero">0°</button>
+          </div>
           <label class="row"><span data-i18n>대지 크기 지정</span> <span class="tip" data-tip="문서(캔버스) 크기를 주문 사이즈로 정확히 고정해요. 인쇄소가 '대지 사이즈는 주문 사이즈와 동일하게'를 요구할 때 켜세요. PDF 페이지·PSD 캔버스·PNG가 전부 이 크기로 나가요. 그림은 가운데 배치되고 드래그로 옮길 수 있어요.">?</span> <input type="checkbox" id="boardOn"></label>
           <div id="boardRow" style="display:none">
             <label class="row">대지 폭(mm) <input type="number" id="boardW" min="10" max="1000" step="0.5" value="50" style="width:76px"></label>
@@ -22002,11 +22009,24 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
         <button class="btn ghost hide" id="earAuto" style="margin-top:6px">고리 자동 위치로</button>
       </div>
       <div class="grp hide" id="korottoGroup">
-        <h3>코롯토 <span class="tip" data-tip="하단을 이만큼 평평하고 두툼하게 만들어 받침 없이 그 자체로 서요. 좁으면 잘 넘어져요.">?</span></h3>
+        <h3>코롯토 <span class="tip" data-tip="하단을 이만큼 평평하고 두툼하게 만들어 받침 없이 그 자체로 서요. 좁으면 잘 넘어져요. 오뚝이는 바닥을 둥글게 깎아 흔들리다 제자리로 돌아와요.">?</span></h3>
+        <label class="row"><span data-i18n>바닥 형태</span>
+          <select id="korottoMode"><option value="flat">일반 (평평한 바닥)</option><option value="roly">오뚝이 (둥근 바닥)</option></select>
+        </label>
         <label class="row">바닥 평평하게(mm) <span class="v" id="korottoFlatV">8</span></label>
         <input type="range" id="korottoFlat" min="2" max="30" value="8" step="1">
-        <label class="row">바닥 모서리 라운드(mm) <span class="v" id="korottoRadV">2.0</span></label>
-        <input type="range" id="korottoRad" min="0" max="8" value="2" step="0.5">
+        <div id="korottoRadBox">
+          <label class="row">바닥 모서리 라운드(mm) <span class="v" id="korottoRadV">2.0</span></label>
+          <input type="range" id="korottoRad" min="0" max="8" value="2" step="0.5">
+        </div>
+        <div id="rolyBox" class="hide">
+          <label class="row">흔들림 세기 <span class="tip" data-tip="세게 두면 바닥 곡률이 무게중심에 가까워져 더 크고 느리게 흔들려요. 약하게 두면 금방 멈추고 안정적이에요. 반지름은 무게중심에서 자동으로 역산해요.">?</span> <span class="v" id="rolySwayV">5</span></label>
+          <input type="range" id="rolySway" min="1" max="10" value="5" step="1">
+          <label class="row"><span data-i18n>바닥 반지름 직접 지정</span> <input type="checkbox" id="rolyManual"></label>
+          <label class="row hide" id="rolyRRow">바닥 반지름(mm) <input type="number" id="rolyR" value="52" min="10" max="600" step="1"></label>
+          <div class="hint" id="rolyStat"></div>
+          <button class="btn ghost hide" id="rolyFix" style="margin-top:6px">⚡ 자동 보정</button>
+        </div>
       </div>
       <div class="grp hide" id="standGroup">
         <h3>스탠드 지지대 <span class="tip" data-tip="위로 드래그하면 엉덩이·몸통 쪽까지 촉을 끌어올릴 수 있어요. 인원이 여럿이면 Shift+클릭으로 여러 촉을 선택해 같이 옮겨요. 안 이어지면 빨갛게 표시돼요.">?</span></h3>
@@ -22068,6 +22088,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
             <option value="simple">단순</option>
           </select></label>
         <div class="hint" id="whiteSimplifyNote" style="display:none">굿즈가 커서(10cm 초과) 단순화를 자동으로 끄고 정밀로 처리했어요 — 큰 굿즈에선 단순화 오차가 눈에 띄어요.</div>
+        <div class="hint" id="whiteFitNote"></div>
         <label class="row" style="margin-top:8px"><span id="whiteOffLabel">화이트 여백(mm)</span> <span class="tip" data-tip="+는 실루엣보다 크게, −는 안쪽으로 죄어요. 아크릴 화이트는 −0.1~−0.3으로 흰끼 삐짐을 막고, 스티커 대지는 +2~+3으로 키우는 게 보통이에요. 0이면 원본 알파의 부드러운 가장자리가 유지돼요."> ?</span> <span class="v" id="whiteOffV">0.0</span></label>
         <input type="range" id="whiteOff" min="-2" max="5" value="0" step="0.1">
         <label class="row">레이어 색 <input type="color" id="whiteInkCol" value="#ffffff"></label>
@@ -22129,7 +22150,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   <a id="updGo" href="#" target="_blank" rel="noopener" class="upd-btn">받으러 가기</a>
   <button id="updLater" class="upd-x" title="나중에">✕</button>
 </div>
-<footer class="credit"><span style="opacity:.55">모아 굿즈메이커 v1.5.7</span> · 오픈소스 고지: CREDITS.md · © 2026 Modi · X <a href="https://x.com/Modi_ing" target="_blank" rel="noopener">@Modi_ing</a> · 문의 <a href="mailto:1000sbin@gmail.com">1000sbin@gmail.com</a></footer>
+<footer class="credit"><span style="opacity:.55">모아 굿즈메이커 v1.6.3</span> · 오픈소스 고지: CREDITS.md · © 2026 Modi · X <a href="https://x.com/Modi_ing" target="_blank" rel="noopener">@Modi_ing</a> · 문의 <a href="mailto:1000sbin@gmail.com">1000sbin@gmail.com</a></footer>
 <span class="spin" id="spin">🍓 칼선 계산 중…</span>
 <div class="modal-bg" id="shapeModalBg">
   <div class="modal">
@@ -22301,10 +22322,185 @@ function spliceSharpTab(loopClosed,xL,xR,yThresh,cornerR){
   return finalLoop;
 }
 
+// ===== 오뚝이(roly-poly) 무게중심 · 바닥 원호 =====
+// 아크릴은 두께가 균일하니 무게중심 = 잘린 도형의 면적 중심. 두께는 안정성 계산에서 상쇄돼 무관하다.
+function polyMoment(pts){ // shoelace — 면적과 1차 모멘트 (감김 방향 무관하게 절대면적 + 중심 반환)
+  let A=0,mx=0,my=0;
+  for(let i=0,n=pts.length;i<n;i++){
+    const a=pts[i],b=pts[(i+1)%n];
+    const cr=a[0]*b[1]-b[0]*a[1];
+    A+=cr; mx+=(a[0]+b[0])*cr; my+=(a[1]+b[1])*cr;
+  }
+  A/=2;
+  if(Math.abs(A)<1e-9)return {A:0,cx:0,cy:0};
+  return {A:Math.abs(A),cx:mx/(6*A),cy:my/(6*A)};
+}
+function pointInPoly(x,y,pts){
+  let inside=false;
+  for(let i=0,n=pts.length,j=n-1;i<n;j=i++){
+    const xi=pts[i][0],yi=pts[i][1],xj=pts[j][0],yj=pts[j][1];
+    if((yi>y)!==(yj>y)&&x<(xj-xi)*(y-yi)/(yj-yi)+xi)inside=!inside;
+  }
+  return inside;
+}
+function loopsCentroid(loops){ // 루프 집합 → 면적·무게중심. 내부 구멍(타공·팔틈)은 중첩 깊이로 판별해 빼줌
+  const ps=loops.map(l=>{
+    const closed=l.length>2&&l[0][0]===l[l.length-1][0]&&l[0][1]===l[l.length-1][1];
+    return closed?l.slice(0,-1):l;
+  }).filter(p=>p.length>=3);
+  if(!ps.length)return null;
+  const ms=ps.map(polyMoment);
+  let A=0,mx=0,my=0;
+  for(let i=0;i<ps.length;i++){
+    let depth=0;
+    for(let j=0;j<ps.length;j++){
+      if(i===j||ms[j].A<=ms[i].A)continue; // 자기보다 큰 루프만 감쌀 수 있음
+      if(pointInPoly(ps[i][0][0],ps[i][0][1],ps[j]))depth++;
+    }
+    const s=(depth%2===0)?1:-1;
+    A+=s*ms[i].A; mx+=s*ms[i].A*ms[i].cx; my+=s*ms[i].A*ms[i].cy;
+  }
+  if(A<=1e-9)return null;
+  return {A,cx:mx/A,cy:my/A};
+}
+function rolyHalfW(xL,xR,arcCx){return Math.max(Math.abs(xL-arcCx),Math.abs(xR-arcCx));}
+function rolyRmin(xL,xR,arcCx){ // 기하 하한 — 이보다 작으면 원호가 바닥 폭을 못 덮어 끝에서 접선이 수직으로 서고 언더컷이 생김
+  return rolyHalfW(xL,xR,arcCx)*1.02;
+}
+function rolyFilletR(xL,xR,arcCx,cornerR,room){ // 원호 끝 ↔ 측벽 코너를 둥글릴 반지름 (기하 한계로 제한)
+  // 필렛 반지름은 바닥이 파이는 깊이의 하한이 된다(깊이 ≥ r). 세로 여유가 좁으면 반드시 같이 줄여야 함.
+  const w=rolyHalfW(xL,xR,arcCx);
+  return Math.max(0,Math.min(cornerR||0,(xR-xL)*0.25,w*0.5,(room||Infinity)*0.55));
+}
+function rolyDepth(xL,xR,arcCx,R,r){ // 측벽에서 바닥이 파이는 깊이. r=0이면 통상 sagitta와 같다
+  const w=rolyHalfW(xL,xR,arcCx),a=R-r,b=w-r;
+  return R-Math.sqrt(Math.max(0,a*a-b*b));
+}
+function rolyTiltDeg(xL,xR,arcCx,R,r){ // 접지점이 원호를 벗어나기 전 최대 기울기 (넘어가면 필렛에 얹혀 넘어짐)
+  const w=rolyHalfW(xL,xR,arcCx);
+  return Math.asin(Math.max(0,Math.min(1,(w-r)/Math.max(1e-6,R-r))))*180/Math.PI;
+}
+function rolyRfloor(xL,xR,arcCx,sagMax,r){ // 바닥 폭을 'sagMax 깊이 안에서' 덮는 최소 반지름
+  // 반지름이 작을수록 원호는 반원에 가까워져 바닥이 깊게 파인다 → 얕게 덮으려면 반지름을 키워야 한다.
+  // 필렛이 있으면 측벽 쪽이 더 깊게 파이므로 깊이는 수식으로 두고 반지름만 이분탐색 (깊이는 R에 단조감소).
+  const w=rolyHalfW(xL,xR,arcCx),s=Math.max(0.5,sagMax);
+  let lo=Math.max(w*1.02,r+1),hi=Math.max(lo*2,w*200+s);
+  if(rolyDepth(xL,xR,arcCx,lo,r)<=s)return Math.max(lo,rolyRmin(xL,xR,arcCx));
+  for(let i=0;i<60;i++){const m=(lo+hi)/2;if(rolyDepth(xL,xR,arcCx,m,r)>s)lo=m;else hi=m;}
+  return Math.max(hi,rolyRmin(xL,xR,arcCx));
+}
+function spliceArcBottom(loopClosed,xL,xR,yThresh,R,arcCx,cornerR){ // 바닥 직선을 원호로 갈아끼움 (최저점이 arcCx에 접함, 양끝은 필렛)
+  const closed=loopClosed.length>1&&loopClosed[0][0]===loopClosed[loopClosed.length-1][0]&&loopClosed[0][1]===loopClosed[loopClosed.length-1][1];
+  const loop=closed?loopClosed.slice(0,-1):loopClosed.slice();
+  const n=loop.length;
+  if(n<4)return loopClosed;
+  const inTab=loop.map(p=>p[1]>yThresh);
+  let start=-1,end=-1;
+  for(let i=0;i<n;i++){
+    if(inTab[i]&&!inTab[(i-1+n)%n])start=i;
+    if(inTab[i]&&!inTab[(i+1)%n])end=i;
+  }
+  if(start<0||end<0)return loopClosed; // 바닥 돌출부를 못 찾으면 원본 그대로 (내부 구멍 루프가 여기로 옴)
+  let bottomY=-1e9;
+  for(let i=start;;i=(i+1)%n){bottomY=Math.max(bottomY,loop[i][1]);if(i===end)break;}
+  const before=loop[(start-1+n)%n],after=loop[(end+1)%n];
+  const fromRight=Math.abs(before[0]-xR)<Math.abs(before[0]-xL); // 진행 방향 감지 (spliceSharpTab과 동일 이유)
+  const x1=fromRight?xR:xL, x2=fromRight?xL:xR;
+  const Rr=Math.max(R,rolyRmin(xL,xR,arcCx),1);
+  const cy=bottomY-Rr;
+  const r=Math.min(rolyFilletR(xL,xR,arcCx,cornerR),Rr*0.4);
+  const arcPts=(px_,py_,rad,a0,a1)=>{ // 표준 각도(0=+x, y는 화면 아래) 기준 원호 샘플
+    const N=Math.max(4,Math.min(96,Math.round(Math.abs(a1-a0)*180/Math.PI*1.5)));
+    const o=[];
+    for(let k=0;k<=N;k++){const a=a0+(a1-a0)*k/N;o.push([px_+rad*Math.cos(a),py_+rad*Math.sin(a)]);}
+    return o;
+  };
+  // 측벽(수직)과 큰 원호에 동시에 접하는 작은 원 → 코너가 각지지 않게. sgn은 도형 내부 방향.
+  const side=(xw,sgn)=>{
+    const fcx=xw+sgn*r, rad=Rr-r, dx=fcx-arcCx, s2=rad*rad-dx*dx;
+    if(r<=0.5||s2<=0){
+      const yy=cy+Math.sqrt(Math.max(0,Rr*Rr-(xw-arcCx)*(xw-arcCx)));
+      return {wall:[xw,yy],fil:[],aBig:Math.atan2(yy-cy,xw-arcCx)};
+    }
+    const fcy=cy+Math.sqrt(s2);
+    const L=Math.hypot(dx,fcy-cy);
+    const aBig=Math.atan2((fcy-cy)/L,dx/L);              // 두 원의 중심을 잇는 방향 = 접점 방향
+    return {wall:[xw,fcy],fil:arcPts(fcx,fcy,r,Math.atan2(0,xw-fcx),aBig),aBig};
+  };
+  const sL=side(xL,1), sR=side(xR,-1);
+  let path=sL.fil.length?sL.fil.slice():[sL.wall];
+  // 최저점(각도 π/2)을 기준으로 두 구간으로 나눠 샘플 — 접지점이 정확히 arcCx 아래에 놓이게
+  const aBot=Math.PI/2;
+  if((sL.aBig-aBot)*(sR.aBig-aBot)<0){
+    path=path.concat(arcPts(arcCx,cy,Rr,sL.aBig,aBot).slice(1));
+    path=path.concat(arcPts(arcCx,cy,Rr,aBot,sR.aBig).slice(1));
+  }else path=path.concat(arcPts(arcCx,cy,Rr,sL.aBig,sR.aBig).slice(1));
+  const rf=sR.fil.slice().reverse();
+  path=path.concat(rf.length?rf.slice(1):[sR.wall]);
+  if(fromRight)path.reverse();
+  const repl=[[x1,before[1]]].concat(path,[[x2,after[1]]]);
+  const out=[];
+  let i=(end+1)%n;
+  while(i!==start){out.push(loop[i]);i=(i+1)%n;}
+  const finalLoop=out.concat(repl);
+  finalLoop.push(finalLoop[0]);
+  return finalLoop;
+}
+function rolyMarginTarget(){ // 흔들림 세기 1~10 → 안정 여유 45%~12% (여유가 작을수록 크고 느리게 흔들림)
+  const sway=Math.max(1,Math.min(10,+$('rolySway').value||5));
+  return 0.45-(sway-1)*(0.33/9);
+}
+function planRoly(ls,k,off){ // 한 인원의 루프들 → 바닥 원호 반지름·무게중심 확정
+  const xL=k.kf.minX-off, xR=k.kf.maxX+off;
+  let bottomY=-1e9;
+  for(const l of ls)for(const p of l)if(p[1]>bottomY)bottomY=p[1];
+  // 원호가 파고들 수 있는 세로 여유 = 평탄 밴드 + 여백. 이 위쪽은 캐릭터 실루엣이라 건드리면 안 됨.
+  const wallRoom=Math.max(px(1),bottomY-k.kf.yFlat);
+  const sagMax=wallRoom*0.72;
+  // 갈아끼우는 구간은 원호가 실제로 파고드는 깊이보다 높아야 한다.
+  // 낮으면 측벽이 구간 위로 삐져나가 경로가 되돌아 접힌다(자기교차).
+  const threshFor=d=>bottomY-Math.min(wallRoom*0.92,d+Math.max(px(1.2),wallRoom*0.08));
+  let yThresh=threshFor(wallRoom*0.45);
+  const flat=ls.map(l=>spliceSharpTab(l,xL,xR,yThresh,0));
+  let cen=loopsCentroid(flat);
+  if(!cen)return null;
+  const manual=$('rolyManual').checked;
+  const mT=rolyMarginTarget();
+  const inset=(xR-xL)*0.15;
+  const bandH=Math.max(1,k.comp.maxY-k.kf.yFlat);
+  const cornerR=px(+$('korottoRad').value||0);
+  let R=0,arcCx=cen.cx,cur=flat,rFloor=0,byWidth=false,fil=0;
+  // 바닥을 원호로 깎으면 하단 모서리 살이 사라져 무게중심이 올라간다 → 3회 수렴 (실측 2회에 안정)
+  for(let it=0;it<3;it++){
+    const h=bottomY-cen.cy;
+    arcCx=Math.max(xL+inset,Math.min(xR-inset,cen.cx));
+    fil=rolyFilletR(xL,xR,arcCx,cornerR,sagMax);
+    const rStable=h/Math.max(0.05,1-mT);             // 자동 복원 조건에서 나온 하한
+    const rDepth=rolyRfloor(xL,xR,arcCx,sagMax,fil); // 바닥 폭을 얕게 덮기 위한 하한
+    const rHard=rolyRfloor(xL,xR,arcCx,wallRoom*0.9,fil); // 기하 한계 — 더 작으면 바닥이 통째로 깎임
+    rFloor=Math.max(rStable,rDepth);
+    byWidth=rDepth>rStable;                          // 바닥이 넓어 흔들림 세기보다 폭이 반지름을 지배
+    R=manual?Math.max(px(+$('rolyR').value||52),rolyRmin(xL,xR,arcCx),rHard):rFloor;
+    yThresh=threshFor(rolyDepth(xL,xR,arcCx,R,fil));
+    cur=ls.map(l=>spliceArcBottom(l,xL,xR,yThresh,R,arcCx,fil)); // 이미 제한된 값을 그대로 전달
+    const c2=loopsCentroid(cur);
+    if(!c2)break;
+    cen=c2;
+  }
+  fil=Math.min(fil,R*0.4);
+  const h=bottomY-cen.cy;
+  const margin=(R-h)/R;                                   // 자동 복원 조건: 무게중심이 원호 중심보다 낮아야 (h<R)
+  const tilt=rolyTiltDeg(xL,xR,arcCx,R,fil);
+  const sag=rolyDepth(xL,xR,arcCx,R,fil);                 // 측벽에서 바닥이 파이는 깊이
+  return {loops:cur,R,h,margin,tilt,sag,fil,bandH,sagMax,wallRoom,yThresh,rFloor,byWidth,arcCx,bottomY,xL,xR,cx:cen.cx,cy:cen.cy,
+    lean:Math.abs(cen.cx-arcCx),
+    ok:margin>0.02, sagOK:sag<=sagMax*1.05, tiltOK:tilt>=8};
+}
+
 // ===== 상태 =====
 const S={img:null,W:0,H:0,type:'ring_hole',pad:0,pW:0,pcH:0,pH:0,xImg:0,yImg:0,
   loops:[],baseLoops:[],rawBbox:null,pxmm:300/25.4,scale:1,mainMaskData:null,artMaskData:null,moveImgMode:false,
-  imgOffX:0,imgOffY:0,tabOffs:{},moveTabMode:false,tabConnectOK:true,standComps:null,korottoComps:null,
+  imgOffX:0,imgOffY:0,tabOffs:{},moveTabMode:false,tabConnectOK:true,standComps:null,korottoComps:null,rolyInfo:null,imgOrig:null,oW:0,oH:0,rot:0,
   shapeX:0,shapeY:0,shapePlaced:false,moveShapeMode:false,
   holes:[],holeOffs:{},earOffs:{},dragging:null,selKind:null,selSet:new Set(),customWhite:null,slotOffs:{},anchorMin:false};
 const $=id=>document.getElementById(id);
@@ -22376,7 +22572,7 @@ function loadImage(file){
     }else if(d)S.dpiDetected=d;
   });
   const img=new Image();img.onload=()=>{
-  S.img=img;S.W=img.naturalWidth;S.H=img.naturalHeight;S.holeOffs={};S.earOffs={};S.selKind=null;S.selSet=new Set();S.customWhite=null;$('whiteUpRow').style.display='none';$('whiteUpRow').classList.add('hide');
+  S.rot=0;setRotUI();setArtSource(img,img.naturalWidth,img.naturalHeight);S.holeOffs={};S.earOffs={};S.selKind=null;S.selSet=new Set();S.customWhite=null;$('whiteUpRow').style.display='none';$('whiteUpRow').classList.add('hide');
   S.tabOffs={};S.imgOffX=0;S.imgOffY=0;S.shapePlaced=false;
   if(S.moveTabMode){S.moveTabMode=false;setTabBtnUI();}
   $('drop').style.display='none';view.style.display='block';$('stageInfo').style.display='block';$('sizeInfo').style.display='block';$('sizeCtrl').style.display='block';
@@ -22384,6 +22580,37 @@ function loadImage(file){
   presetSizes();recompute(true);
 };img.src=URL.createObjectURL(file);}
 
+function applyRotation(){ // 원본을 회전시켜 S.img로 굽는다. 이후 파이프라인(마스크·칼선·화이트·내보내기)은 회전을 몰라도 된다.
+  if(!S.imgOrig){S.img=null;return;}
+  const bump=()=>{S._srcStamp=(S._srcStamp||0)+1;S._maskCache=null;S._whitePrevC=null;};
+  const a=((+S.rot||0)%360+360)%360;
+  if(a===0){S.img=S.imgOrig;S.W=S.oW;S.H=S.oH;bump();return;}
+  const oW=S.oW,oH=S.oH,r=a*Math.PI/180;
+  const quarter=(a%90===0)?Math.round(a/90):0;   // 1·2·3 = 90·180·270°
+  const W=quarter?((quarter%2)?oH:oW):Math.max(1,Math.round(oW*Math.abs(Math.cos(r))+oH*Math.abs(Math.sin(r))));
+  const H=quarter?((quarter%2)?oW:oH):Math.max(1,Math.round(oW*Math.abs(Math.sin(r))+oH*Math.abs(Math.cos(r))));
+  const cv=document.createElement('canvas');cv.width=W;cv.height=H;
+  const cx=cv.getContext('2d');
+  cx.imageSmoothingEnabled=true;cx.imageSmoothingQuality='high';
+  // 직각 회전은 정수 변환으로 — 보간이 아예 일어나지 않아 외곽이 원본과 픽셀 단위로 동일하다
+  if(quarter===1)cx.setTransform(0,1,-1,0,oH,0);
+  else if(quarter===2)cx.setTransform(-1,0,0,-1,oW,oH);
+  else if(quarter===3)cx.setTransform(0,-1,1,0,0,oW);
+  else{cx.translate(W/2,H/2);cx.rotate(r);cx.translate(-oW/2,-oH/2);}
+  cx.drawImage(S.imgOrig,0,0);
+  S.img=cv;S.W=W;S.H=H;bump();
+}
+function setRotUI(){const v=+S.rot||0;$('rot').value=v;$('rotSl').value=v;}
+function setRot(v,live){
+  let a=+v; if(!isFinite(a))a=0;
+  a=Math.max(-180,Math.min(180,Math.round(a*2)/2));
+  S.rot=a; setRotUI();
+  if(!S.imgOrig)return;
+  applyRotation(); presetSizes(); recompute(true,live?90:30);
+}
+function setArtSource(img,w,h){ // 원본 교체 (회전 각도는 유지)
+  S.imgOrig=img;S.oW=w;S.oH=h;applyRotation();
+}
 function presetSizes(){
   S.pxmm=(+$('dpi').value||300)/25.4;
   const wmm=tomm(S.W);
@@ -22417,6 +22644,14 @@ function applyType(){
   updateWhiteLabels();
   $('standGroup').classList.toggle('hide',t!=='stand');
   $('korottoGroup').classList.toggle('hide',t!=='korotto');
+  applyKorottoMode();
+}
+function applyKorottoMode(){
+  const roly=$('korottoMode').value==='roly';
+  $('rolyBox').classList.toggle('hide',!roly);
+  $('korottoRadBox').classList.remove('hide'); // 오뚝이도 원호 끝 ↔ 측벽 코너가 각지므로 라운드가 필요
+  $('rolyRRow').classList.toggle('hide',!$('rolyManual').checked);
+  $('rolySway').disabled=$('rolyManual').checked;
 }
 applyType();
 
@@ -22645,7 +22880,7 @@ function computeCore(reposition){
       const maxAreaPx=(+$('fillHolesMax').value||0)*S.pxmm*S.pxmm;
       S.holeFillResult=fillSmallHoles(mask,S.pW,S.pcH,maxAreaPx);
     }else S.holeFillResult=null;
-    S.korottoComps=null;
+    S.korottoComps=null;S.rolyInfo=null;
     if(S.type==='korotto'){
       const lc=personComps(mask);
       S.korottoComps=[];
@@ -22768,15 +23003,31 @@ function computeCore(reposition){
         return spliceSharpTab(l,c.tabCx-tabWfinalPx/2,c.tabCx+tabWfinalPx/2,c.maxY+off);
       });
     }
+    S.rolyInfo=null;
     if(S.type==='korotto'&&S.korottoComps&&S.korottoComps.length){
-      // 인원별 바닥을 각각 평평하게 갈아끼움
       const comps=S.korottoComps.map(k=>k.comp);
-      loops=loops.map(l=>{
-        const i=loopCompIdx(l,comps);if(i<0)return l;
-        const k=S.korottoComps[i];
-        const yThresh=(k.kf.yFlat+k.comp.maxY)/2;
-        return spliceSharpTab(l,k.kf.minX-off,k.kf.maxX+off,yThresh,px(+$('korottoRad').value||0));
-      });
+      if($('korottoMode').value==='roly'){
+        // 인원별 바닥을 둥근 원호로 — 반지름은 그 인원의 무게중심에서 역산
+        const byComp=new Map();
+        for(const l of loops){const i=loopCompIdx(l,comps);if(i<0)continue;if(!byComp.has(i))byComp.set(i,[]);byComp.get(i).push(l);}
+        const out=loops.slice(),info=[];
+        for(const [ci,ls] of byComp){
+          const r=planRoly(ls,S.korottoComps[ci],off);
+          if(!r)continue;
+          ls.forEach((l,j)=>{const idx=out.indexOf(l);if(idx>=0)out[idx]=r.loops[j];});
+          info.push(r);
+        }
+        loops=out;
+        if(info.length)S.rolyInfo=info;
+      }else{
+        // 인원별 바닥을 각각 평평하게 갈아끼움
+        loops=loops.map(l=>{
+          const i=loopCompIdx(l,comps);if(i<0)return l;
+          const k=S.korottoComps[i];
+          const yThresh=(k.kf.yFlat+k.comp.maxY)/2;
+          return spliceSharpTab(l,k.kf.minX-off,k.kf.maxX+off,yThresh,px(+$('korottoRad').value||0));
+        });
+      }
     }
     S.loops=loops;
     S.baseLoops=[];
@@ -23234,8 +23485,27 @@ function render(){
       vctx.stroke();vctx.setLineDash([]);
     });
   }
+  if(S.type==='korotto'&&S.rolyInfo)drawRolyMarks();
   const sl=shapeLoop();
   if(sl){vctx.strokeStyle=$('shapeCol').value;vctx.lineWidth=lw;strokeLoop(vctx,sl,S.scale);}
+}
+function drawRolyMarks(){ // 무게중심 · 접지점 · 바닥선
+  const s=S.scale;
+  for(const r of S.rolyInfo){
+    const bad=!r.ok;
+    const col=bad?'#ff2d55':'#3b82d6';
+    vctx.save();
+    vctx.strokeStyle=col;vctx.lineWidth=1.2;vctx.setLineDash([5,4]);
+    vctx.beginPath();vctx.moveTo(r.arcCx*s,(r.cy-14/s)*s);vctx.lineTo(r.arcCx*s,r.bottomY*s);vctx.stroke(); // 수직 균형선
+    vctx.beginPath();vctx.moveTo((r.xL-4)*s,r.bottomY*s);vctx.lineTo((r.xR+4)*s,r.bottomY*s);vctx.stroke(); // 바닥(접지)선
+    vctx.setLineDash([]);
+    const cx=r.cx*s,cy=r.cy*s;
+    vctx.beginPath();vctx.arc(cx,cy,7,0,7);
+    vctx.fillStyle='rgba(255,255,255,.9)';vctx.fill();vctx.strokeStyle=col;vctx.lineWidth=1.6;vctx.stroke();
+    vctx.beginPath();vctx.moveTo(cx-7,cy);vctx.lineTo(cx+7,cy);vctx.moveTo(cx,cy-7);vctx.lineTo(cx,cy+7);vctx.stroke(); // 무게중심 십자
+    vctx.beginPath();vctx.arc(r.arcCx*s,r.bottomY*s,3,0,7);vctx.fillStyle=col;vctx.fill(); // 접지점
+    vctx.restore();
+  }
 }
 function countAnchors(){ // 내보내기 패스의 총 앵커 수 (피팅 캐시 l._fk 공유 — 렌더·카운트 중복 제거)
   if(!S.img||!S.loops)return 0;
@@ -23274,7 +23544,8 @@ function updateInfo(){
     $('targetW').value=tomm(S.rawBbox.maxX-S.rawBbox.minX).toFixed(1);
     $('targetH').value=tomm(S.rawBbox.maxY-S.rawBbox.minY).toFixed(1);
   }
-  $('sizeInfo').innerHTML=`${t('원본')} <b>${S.W}×${S.H}px</b> · ${t('실물 약')} <b>${tomm(S.W).toFixed(1)}×${tomm(S.H).toFixed(1)}mm</b>${sil} @ ${$('dpi').value}dpi${dpiTag}`;
+  const rotTag=(+S.rot)?` · ${t('회전')} <b>${(+S.rot).toFixed(1).replace(/\.0$/,'')}°</b> <span style="opacity:.6">(${S.oW}×${S.oH}px → ${S.W}×${S.H}px)</span>`:'';
+  $('sizeInfo').innerHTML=`${t('원본')} <b>${S.W}×${S.H}px</b> · ${t('실물 약')} <b>${tomm(S.W).toFixed(1)}×${tomm(S.H).toFixed(1)}mm</b>${sil} @ ${$('dpi').value}dpi${dpiTag}${rotTag}`;
   const parts=[`${t('칼선 조각')} <b>${S.loops.length+S.baseLoops.length}</b>`,`${t('여백')} <b>${(+$('offset').value).toFixed(1)}mm</b>`];
   { // 굿즈 실물 크기 — 진짜 칼선(각 조각의 bbox) 기준
     const dim=l=>{
@@ -23303,10 +23574,69 @@ function updateInfo(){
   if(S.type==='korotto'){
     parts.push(`${t('바닥 평면')} <b>${$('korottoFlat').value}mm</b>`);
     if(S.korottoComps&&S.korottoComps.length>1)parts.push(`${t('인원')} <b>${S.korottoComps.length}</b>`);
+    if(S.rolyInfo&&S.rolyInfo.length){
+      const r=S.rolyInfo.reduce((a,b)=>b.margin<a.margin?b:a); // 가장 불안정한 인원 기준
+      parts.push(`${t('바닥 반지름')} <b>${tomm(r.R).toFixed(0)}mm</b>`);
+      parts.push(`${t('무게중심 높이')} <b>${tomm(r.h).toFixed(1)}mm</b>`);
+      parts.push(r.ok?`${t('자동 복원')} <b style="color:#2e9e5b">O</b> · ${t('여유')} <b>${Math.round(r.margin*100)}%</b>`
+                    :`<b style="color:#ff2d55">⚠ ${t('무게중심이 원호 중심보다 높아 안 돌아와요')}</b>`);
+      parts.push(`${t('최대 흔들림')} <b>${r.tilt.toFixed(0)}°</b>`);
+    }
   }
+  updRolyStat();
+  updWhiteFitNote();
   if($('shapeOn').checked)parts.push(`${t('도형')} <b>${$('shapeW').value}×${$('shapeH').value}mm</b>`);
   $('anchorInfo').textContent='⚓ '+t('칼선 앵커')+' '+countAnchors()+t('개');
   $('stageInfo').innerHTML=parts.join(' · ')+(S.type==='stand'&&!S.tabConnectOK?` · <b style="color:#ff2d55">⚠ ${t('촉이 그림과 안 이어질 수 있어요, 위치를 조정해보세요')}</b>`:'');
+}
+function updRolyStat(){
+  const box=$('rolyStat'),fix=$('rolyFix');
+  if(!box)return;
+  if(!(S.type==='korotto'&&$('korottoMode').value==='roly')){box.innerHTML='';fix.classList.add('hide');return;}
+  const info=S.rolyInfo;
+  if(!info||!info.length){box.textContent=t('바닥을 둥글게 깎아 흔들리다 제자리로 돌아오게 만들어요. 이미지를 올리면 무게중심을 재서 반지름을 잡아줘요.');fix.classList.add('hide');return;}
+  const r=info.reduce((a,b)=>b.margin<a.margin?b:a);
+  const lines=[`${t('무게중심 높이')} ${tomm(r.h).toFixed(1)}mm · ${t('바닥 반지름')} ${tomm(r.R).toFixed(0)}mm · ${t('바닥 볼록')} ${tomm(r.sag).toFixed(1)}mm · ${t('최대 흔들림')} ${r.tilt.toFixed(0)}°`];
+  if(r.fil>0.5)lines.push(`${t('원호 끝 라운드')} ${tomm(r.fil).toFixed(1)}mm`);
+  else lines.push(`<b style="color:#c85b7c">${t('원호 끝이 각져요 — 바닥 모서리 라운드를 올려보세요')}</b>`);
+  const warn=[];
+  if(!r.ok)warn.push(t('무게중심이 원호 중심보다 높아 안 돌아와요'));
+  if(!r.sagOK)warn.push(t('원호가 바닥 평면보다 깊어 발이 깎일 수 있어요'));
+  if(!r.tiltOK)warn.push(t('바닥이 좁아 거의 흔들리지 않아요'));
+  if(r.lean>px(1.5))warn.push(t('무게중심이 좌우로 치우쳐 기울어진 채로 서요'));
+  const fixable=!r.ok||!r.sagOK||!r.tiltOK;
+  if(warn.length){
+    lines.push('<b style="color:#ff2d55">⚠ '+warn.join(' / ')+'</b>');
+    fix.classList.toggle('hide',!fixable);
+  }else{
+    lines.push(`<b style="color:#2e9e5b">✓ ${t('자동 복원')} ${t('여유')} ${Math.round(r.margin*100)}%</b>`);
+    if(r.byWidth&&!$('rolyManual').checked)lines.push(t('바닥이 넓어서 흔들림 세기보다 바닥 폭이 반지름을 결정했어요.'));
+    fix.classList.add('hide');
+  }
+  box.innerHTML=lines.join('<br>');
+}
+function rolyAutoFix(){ // 경고 원인을 한 번에 해소
+  const info=S.rolyInfo;if(!info||!info.length)return;
+  const manual=$('rolyManual').checked;
+  let flatMm=+$('korottoFlat').value,rMm=+$('rolyR').value;
+  const changed=[];
+  for(const r of info){
+    // 반지름 부족(복원 불가 / 원호가 너무 깊음) → 계산된 권장 반지름으로. 자동 모드는 이미 권장값이라 손댈 게 없음.
+    if(manual&&(!r.ok||!r.sagOK)){
+      const need=Math.ceil(tomm(r.rFloor));
+      if(need>rMm){rMm=Math.min(600,need);changed.push(t('바닥 반지름'));}
+    }
+    // 바닥이 좁아 안 흔들림 → 평탄 밴드를 키우면 스캔 범위가 넓어져 바닥 폭도 같이 늘어남
+    if(!r.tiltOK||(!manual&&!r.sagOK)){
+      const need=Math.min(30,Math.max(flatMm+3,Math.ceil(tomm(r.sag)/0.8)+1));
+      if(need>flatMm){flatMm=need;changed.push(t('바닥 평면'));}
+    }
+  }
+  if(!changed.length){toast('🍓 '+t('더 보정할 게 없어요'));return;}
+  $('korottoFlat').value=flatMm;$('korottoFlatV').textContent=flatMm;
+  $('rolyR').value=rMm;
+  toast('⚡ '+[...new Set(changed)].join(' · ')+' '+t('보정했어요'));
+  recompute(true);
 }
 
 // ===== 컨트롤 =====
@@ -23316,6 +23646,11 @@ $('smooth').oninput=()=>{$('smV').textContent=['각지게','보통','부드럽�
 $('hd').oninput=()=>{$('hdV').textContent=(+$('hd').value).toFixed(1);S.type==='ring_tab'?recompute(false):(render(),updateInfo());};
 $('wall').oninput=()=>recompute(false);
 $('dpi').onchange=()=>{presetSizes();recompute(true);};
+$('rot').onchange=()=>setRot($('rot').value,false);
+$('rotSl').oninput=()=>setRot($('rotSl').value,true);
+$('rotL').onclick=()=>setRot(((+S.rot||0)-90+540)%360-180,false);
+$('rotR').onclick=()=>setRot(((+S.rot||0)+90+540)%360-180,false);
+$('rotZero').onclick=()=>setRot(0,false);
 $('bgmode').onchange=()=>recompute(true);
 $('fillHoles').onchange=()=>recompute(true);
 $('fillHolesMax').oninput=()=>{if($('fillHoles').checked)recompute(true);};
@@ -23324,6 +23659,11 @@ $('cutcol').oninput=render;$('cutw').oninput=render;
 ['tabW','tabH','baseW','baseH','acr'].forEach(id=>$(id).oninput=()=>recompute(false));
 $('korottoFlat').oninput=()=>{$('korottoFlatV').textContent=$('korottoFlat').value;recompute(false);};
 $('korottoRad').oninput=()=>{$('korottoRadV').textContent=(+$('korottoRad').value).toFixed(1);recompute(false);};
+$('korottoMode').onchange=()=>{applyKorottoMode();recompute(true);};
+$('rolySway').oninput=()=>{$('rolySwayV').textContent=$('rolySway').value;recompute(false);};
+$('rolyManual').onchange=()=>{applyKorottoMode();recompute(false);};
+$('rolyR').oninput=()=>recompute(false);
+$('rolyFix').onclick=rolyAutoFix;
 $('slotOff').oninput=()=>{$('slotOffV').textContent=(+$('slotOff').value).toFixed(1);recompute(false);};
 $('cornerRound').oninput=()=>{$('cornerRoundV').textContent=(+$('cornerRound').value).toFixed(1);recompute(false,220);}; // 필렛은 모폴로지가 무거워 디바운스 길게 — 드래그 중 누적 계산 방지
 function applyTargetSize(which){
@@ -23545,10 +23885,18 @@ function layerCanvas(kind){const c=document.createElement('canvas');c.width=S.pW
   if(kind==='design'||kind==='preview')ctx.drawImage(S.img,S.xImg,S.yImg,S.W,S.H);
   if(kind==='design')maskDesignToArt(ctx); // 내보내기용 디자인은 배경 투명 보장
   if(kind==='cut'||kind==='preview')paintCut(ctx);return c;}
-function customWhiteAlpha(){ // 업로드 화이트의 알파를 판 좌표계로 (원본 자리에 맞춰 스케일)
+function customWhiteAlpha(){ // 업로드 화이트의 알파를 판 좌표계로
   if(!S.customWhite)return null;
   const t=document.createElement('canvas');t.width=S.pW;t.height=S.pcH;
-  const tctx=t.getContext('2d');tctx.drawImage(S.customWhite,S.xImg,S.yImg,S.W,S.H);
+  const tctx=t.getContext('2d');
+  const cw=S.customWhite;
+  // 화이트가 원본 그림과 '같은 픽셀 크기'면 = 같은 캔버스에서 내보낸 짝 레이어.
+  // 이때는 원본과 완전히 동일한 방식(스케일 없이 같은 좌표)으로 그려 픽셀 단위 정렬 보장.
+  if(cw.width===S.W&&cw.height===S.H){
+    tctx.drawImage(cw,S.xImg,S.yImg);
+  }else{
+    tctx.drawImage(cw,S.xImg,S.yImg,S.W,S.H);
+  }
   return tctx.getImageData(0,0,S.pW,S.pcH).data;
 }
 function whiteLayerCanvas(colorHex){ // 백판 = 원본 그림에서 색만 바꾼 것 (칼선 보정 무시 — 잉크 없는 곳엔 화이트도 없음)
@@ -23608,7 +23956,7 @@ async function saveBlob(blob,name){ // 폴더 지정 시 그 폴더로, 아니�
   dl(URL.createObjectURL(blob),name);
 }
 const REPO='1000sbin/moa-goods-maker'; // 업데이트 확인용 저장소
-const APP_VER='1.5.7'; // 배포 시 버전 배지와 함께 갱신
+const APP_VER='1.6.3'; // 배포 시 버전 배지와 함께 갱신
 function verCmp(a,b){ // 'v1.5.7' vs '1.4.6' → 1/0/-1
   const pa=String(a).replace(/^v/,'').split('.').map(n=>parseInt(n)||0);
   const pb=String(b).replace(/^v/,'').split('.').map(n=>parseInt(n)||0);
@@ -24131,7 +24479,9 @@ function fixCurls(knots,denseRef){ // 피팅 결과에서 고리(컬)·오버슈
     const tubeBase=Math.max(1.1,(S.anchorMin?2.5:(smLv2<=2?0.45:0.75))*2.5); // 허용 관 반경 — 디테일 모드(둥글리기≤2)에선 더 좁게
     const zones=(typeof S!=='undefined'&&S._fitProtect)?S._fitProtect:[]; // 부속(귀·타공) 주변은 최소화 중에도 좁은 관 — 고리 벽이 찌그러지지 않게
     let i=0,guard=0;
-    while(i<knots.length&&guard++<knots.length*3+60){
+    // 가드 상한을 '진입 시점'에 고정 — 루프 안 splice로 knots가 커지면 상한도 같이 커져 종료가 안 되던 문제
+    const guardMax=knots.length*3+60, maxKnots=knots.length*3+120;
+    while(i<knots.length&&guard++<guardMax&&knots.length<maxKnots){
       const a=knots[i],b=knots[(i+1)%knots.length];
       const smp=segmentSamples(a,b,10);
       let worst=0,wref=null;
@@ -24302,7 +24652,7 @@ function whiteVectorLoops(){ // 화이트/대지 실루엣의 벡터 윤곽 (구
   const D=edt2d(m,S.pW,S.pcH);
   let loops=linkLoops(marchingSquares(D,S.pW,S.pcH,0.5));
   loops=loops.filter(l=>l.length>=4&&perim(l)>=8)
-    .map(l=>smoothLoop(chaikin(l,2),px(0.8))) // 픽셀 계단 제거 — 이후 베지어 피팅이 앵커를 최소화
+    .map(l=>smoothLoop(chaikin(l,2),2)) // 픽셀 계단만 제거(2px 고정). mm로 크게 잡으면 볼록한 디테일이 갉여 그림과 어긋남
     .filter(l=>l.length>=3);
   return loops;
 }
@@ -24394,16 +24744,52 @@ $('expPsd').onclick=async()=>{
   try{const buf=agPsd.writePsd(psd);saveBlob(new Blob([buf],{type:'image/vnd.adobe.photoshop'}),'굿즈_칼선.psd');}
   catch(err){showExpWarn('PSD 생성 중 오류: '+err.message);}
 };
-$('whiteLayer').onchange=()=>{$('whiteOpts').style.display=$('whiteLayer').checked?'block':'none';};
+$('whiteLayer').onchange=()=>{$('whiteOpts').style.display=$('whiteLayer').checked?'block':'none';updWhiteFitNote();};
 $('whitePreview').onchange=()=>{S._whitePrevC=($('whitePreview').checked&&S.img)?whitePreviewCanvas():null;render();};
+function updWhiteFitNote(){ // 실제로 내보낼 화이트가 그림과 얼마나 어긋나는지 실측해서 보여줌
+  const n=$('whiteFitNote');if(!n)return;
+  if(!($('whiteLayer').checked&&S.img&&S.srcMaskData)){n.innerHTML='';S._wfKey=null;return;}
+  const key=[S.pW,S.pcH,S._srcStamp||0,$('whiteOff').value,$('whiteFormat').value,$('whiteSimplify').value,
+             $('thresh').value,$('bgmode').value,S.customWhite?1:0].join('|');
+  if(S._wfKey===key){n.innerHTML=S._wfHtml||'';return;}
+  let html='';
+  try{
+    const c=whitePreviewCanvas(); // 미리보기 = 실제 내보낼 형상
+    const d=c.getContext('2d').getImageData(0,0,S.pW,S.pcH).data;
+    const m=S.srcMaskData,W=S.pW,H=S.pcH;
+    let art=0,miss=0,over=0,edge=0;
+    for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+      const p=y*W+x,a=m[p]?1:0,v=d[p*4+3]>=128?1:0;
+      if(a){
+        art++;
+        if(!v)miss++;
+        if(!m[p-1]||!m[p+1]||y===0||!m[p-W]||y===H-1||!m[p+W])edge++; // 실루엣 경계 픽셀 ≈ 둘레
+      }else if(v)over++;
+    }
+    const mm2=1/(S.pxmm*S.pxmm);
+    const missMm=miss*mm2,overMm=over*mm2;
+    const periMm=tomm(edge); // 경계 픽셀 수 → 대략적 둘레
+    const avg=periMm>0?(missMm+overMm)/periMm:0; // 평균 어긋난 폭
+    const wOff=+$('whiteOff').value||0;
+    const big=avg>=0.06;
+    const col=big?'#c85b7c':'#2e9e5b';
+    html=`<b style="color:${col}">${t('화이트 ↔ 그림')} ${t('평균')} ${avg.toFixed(3)}mm</b>`
+       +` · ${t('빠짐')} ${missMm.toFixed(1)}mm² · ${t('넘침')} ${overMm.toFixed(1)}mm²`
+       +` (${t('그림의')} ${(100*(miss+over)/Math.max(1,art)).toFixed(2)}%)`;
+    if(Math.abs(wOff)>=0.05)html+=`<br>${t('화이트 여백')} <b>${wOff>0?'+':''}${wOff.toFixed(1)}mm</b> ${t('설정 때문이에요. 그림과 똑같이 맞추려면 0으로 두세요.')}`;
+    else if(big)html+=`<br>${t('여백은 0인데도 벌어져 있어요 — 화이트 형식을 래스터로 바꾸면 그림과 픽셀 단위로 일치해요.')}`;
+  }catch(err){html='';}
+  S._wfKey=key;S._wfHtml=html;
+  n.innerHTML=html;
+}
 function updWhiteSimplifyNote(){
   const n=$('whiteSimplifyNote');if(!n)return;
   const on=$('whiteSimplify').value==='simple'&&S.img&&!whiteSimplifyEffective();
   n.style.display=on?'block':'none';
 }
-$('whiteSimplify').onchange=()=>{updWhiteSimplifyNote();if($('whitePreview').checked&&S.img){S._whitePrevC=whitePreviewCanvas();render();}};
-$('whiteFormat').onchange=()=>{if($('whitePreview').checked&&S.img){S._whitePrevC=whitePreviewCanvas();render();}};
-$('whiteOff').onchange=()=>{if($('whitePreview').checked&&S.img){S._whitePrevC=whitePreviewCanvas();render();}};
+$('whiteSimplify').onchange=()=>{updWhiteSimplifyNote();updWhiteFitNote();if($('whitePreview').checked&&S.img){S._whitePrevC=whitePreviewCanvas();render();}};
+$('whiteFormat').onchange=()=>{if($('whitePreview').checked&&S.img){S._whitePrevC=whitePreviewCanvas();render();}updWhiteFitNote();};
+$('whiteOff').onchange=()=>{if($('whitePreview').checked&&S.img){S._whitePrevC=whitePreviewCanvas();render();}updWhiteFitNote();};
 $('whiteOff').oninput=()=>{$('whiteOffV').textContent=(+$('whiteOff').value).toFixed(1);};
 function updateWhiteLabels(){ // 스티커 계열이면 '대지'로 표기 전환
   const st=(S.type==='sticker'||S.type==='sheet');
@@ -24437,7 +24823,7 @@ async function runBatch(files){
   let JSZip;try{JSZip=await loadJSZip();}catch(_){showExpWarn('ZIP 모듈을 불러오지 못했어요(인터넷 필요).');return;}
   const st=$('batchStatus');st.style.display='block';
   // 현재 상태 백업
-  const bak={img:S.img,W:S.W,H:S.H,imgOffX:S.imgOffX,imgOffY:S.imgOffY,tabOffs:S.tabOffs,
+  const bak={imgOrig:S.imgOrig,oW:S.oW,oH:S.oH,imgOffX:S.imgOffX,imgOffY:S.imgOffY,tabOffs:S.tabOffs,
     holeOffs:S.holeOffs,earOffs:S.earOffs};
   const zip=new JSZip();
   const withWhite=$('whiteLayer').checked;
@@ -24446,7 +24832,7 @@ async function runBatch(files){
     await new Promise(r=>setTimeout(r,20)); // UI 갱신 틈
     try{
       const img=await loadImageFile(files[i]);
-      S.img=img;S.W=img.naturalWidth;S.H=img.naturalHeight;
+      setArtSource(img,img.naturalWidth,img.naturalHeight); // 회전 각도는 전체에 공통 적용
       S.imgOffX=0;S.imgOffY=0;S.tabOffs={};S.holeOffs={};S.earOffs={};
       computeCore(true);
       const folder=zip.folder(safeName(files[i].name));
@@ -24463,7 +24849,8 @@ async function runBatch(files){
   const blob=await zip.generateAsync({type:'blob'});
   saveBlob(blob,'굿즈_일괄.zip');
   // 원래 이미지 상태 복원
-  S.img=bak.img;S.W=bak.W;S.H=bak.H;S.imgOffX=bak.imgOffX;S.imgOffY=bak.imgOffY;
+  S.imgOrig=bak.imgOrig;S.oW=bak.oW;S.oH=bak.oH;applyRotation();
+  S.imgOffX=bak.imgOffX;S.imgOffY=bak.imgOffY;
   S.tabOffs=bak.tabOffs;S.holeOffs=bak.holeOffs;S.earOffs=bak.earOffs;
   if(S.img){computeCore(false);fitAndRender();updateInfo();}
   st.innerHTML=`완료! <b>${files.length}장</b> 처리됨 · ZIP 다운로드가 시작됐어요.`;
@@ -24505,6 +24892,40 @@ $('dirClear').onclick=async()=>{dirHandle=null;await idbSet('dirHandle',null);re
 
 // ===== 언어 (한국어/English) =====
 const TR_EN={
+'화이트 ↔ 그림':'White vs artwork',
+'평균':'avg',
+'빠짐':'missing',
+'넘침':'overflow',
+'그림의':'of artwork',
+'설정 때문이에요. 그림과 똑같이 맞추려면 0으로 두세요.':'is doing this. Set it to 0 to match the artwork exactly.',
+'여백은 0인데도 벌어져 있어요 — 화이트 형식을 래스터로 바꾸면 그림과 픽셀 단위로 일치해요.':'Offset is 0 but there is still a gap — switch the white format to raster for a pixel-exact match.',
+'그림 회전(°)':'Rotate artwork (°)',
+'회전':'Rotation',
+'↺ 90°':'↺ 90°',
+'↻ 90°':'↻ 90°',
+'원호 끝 라운드':'Arc-end fillet',
+'원호 끝이 각져요 — 바닥 모서리 라운드를 올려보세요':"The arc ends in a sharp corner — try raising the bottom corner radius",
+'바닥이 넓어서 흔들림 세기보다 바닥 폭이 반지름을 결정했어요.':'The bottom is wide, so its width set the radius instead of the wobble strength.',
+'바닥 형태':'Bottom shape',
+'일반 (평평한 바닥)':'Flat (standard)',
+'오뚝이 (둥근 바닥)':'Roly-poly (curved)',
+'흔들림 세기':'Wobble strength',
+'바닥 반지름 직접 지정':'Set bottom radius manually',
+'바닥 반지름(mm)':'Bottom radius (mm)',
+'⚡ 자동 보정':'⚡ Auto-fix',
+'바닥 반지름':'Bottom radius',
+'무게중심 높이':'Center of mass height',
+'자동 복원':'Self-righting',
+'여유':'Margin',
+'최대 흔들림':'Max tilt',
+'바닥 볼록':'Bottom bulge',
+'무게중심이 원호 중심보다 높아 안 돌아와요':'Center of mass sits above the arc\'s center — it won\'t right itself',
+'원호가 바닥 평면보다 깊어 발이 깎일 수 있어요':'The arc is deeper than the flat band — the feet may get cut',
+'바닥이 좁아 거의 흔들리지 않아요':'Bottom is too narrow — it barely rocks',
+'무게중심이 좌우로 치우쳐 기울어진 채로 서요':'Center of mass is off to one side — it will rest tilted',
+'바닥을 둥글게 깎아 흔들리다 제자리로 돌아오게 만들어요. 이미지를 올리면 무게중심을 재서 반지름을 잡아줘요.':'Rounds the bottom so it rocks and returns upright. Drop an image and the radius is derived from its center of mass.',
+'더 보정할 게 없어요':'Nothing left to fix',
+'보정했어요':'adjusted',
 '모아 굿즈메이커':'MOA Goods Maker',
 '투명 PNG를 올리면 칼선·타공·고리·지지대를 자동으로 만들어요. 디자인/칼선/화이트 레이어 분리로 PSD·PNG 저장까지.':'Upload a transparent PNG to auto-generate cutlines, holes, tabs and stands. Export layered PSD/PNG with design, cutline and white layers.',
 '설정':'Settings','인터페이스 컬러':'Interface color','언어':'Language','저장 폴더':'Save folder',
@@ -24562,6 +24983,40 @@ const TR_EN={
 'HINT_sticker':'Outline cutline only. No hole or loop.','HINT_sheet':'Multiple stickers on one sheet, each with its own cutline.','HINT_ring_hole':'Punches a hole directly in the design.','HINT_ring_tab':'Adds a loop tab above the design.','HINT_stand':'Adds a tab below and a separate base piece.','HINT_korotto':'Flattens and thickens the bottom so it stands on its own.','HINT_acrylic':'Outline cutline only (for plain acrylic).',
 };
 const TR_JA={
+'화이트 ↔ 그림':'ホワイト↔絵',
+'평균':'平均',
+'빠짐':'不足',
+'넘침':'はみ出し',
+'그림의':'絵の',
+'설정 때문이에요. 그림과 똑같이 맞추려면 0으로 두세요.':'の設定によるものです。絵と完全に合わせるには0にしてください。',
+'여백은 0인데도 벌어져 있어요 — 화이트 형식을 래스터로 바꾸면 그림과 픽셀 단위로 일치해요.':'余白は0なのにずれています — ホワイト形式をラスターにすると絵とピクセル単位で一致します。',
+'그림 회전(°)':'画像の回転(°)',
+'회전':'回転',
+'↺ 90°':'↺ 90°',
+'↻ 90°':'↻ 90°',
+'원호 끝 라운드':'円弧端の丸み',
+'원호 끝이 각져요 — 바닥 모서리 라운드를 올려보세요':'円弧の端が角ばっています — 底角の丸みを上げてみてください',
+'바닥이 넓어서 흔들림 세기보다 바닥 폭이 반지름을 결정했어요.':'底が広いため、揺れの強さより底の幅が半径を決めました。',
+'바닥 형태':'底の形',
+'일반 (평평한 바닥)':'通常（平らな底）',
+'오뚝이 (둥근 바닥)':'起き上がりこぼし（丸い底）',
+'흔들림 세기':'揺れの強さ',
+'바닥 반지름 직접 지정':'底の半径を手動指定',
+'바닥 반지름(mm)':'底の半径(mm)',
+'⚡ 자동 보정':'⚡ 自動補正',
+'바닥 반지름':'底の半径',
+'무게중심 높이':'重心の高さ',
+'자동 복원':'自動復元',
+'여유':'余裕',
+'최대 흔들림':'最大傾き',
+'바닥 볼록':'底のふくらみ',
+'무게중심이 원호 중심보다 높아 안 돌아와요':'重心が円弧の中心より高く、起き上がりません',
+'원호가 바닥 평면보다 깊어 발이 깎일 수 있어요':'円弧が平らな帯より深く、足が削れる可能性があります',
+'바닥이 좁아 거의 흔들리지 않아요':'底が狭くてほとんど揺れません',
+'무게중심이 좌우로 치우쳐 기울어진 채로 서요':'重心が左右にずれていて傾いたまま立ちます',
+'바닥을 둥글게 깎아 흔들리다 제자리로 돌아오게 만들어요. 이미지를 올리면 무게중심을 재서 반지름을 잡아줘요.':'底を丸くして、揺れても元に戻るようにします。画像を入れると重心から半径を自動計算します。',
+'더 보정할 게 없어요':'これ以上の補正はありません',
+'보정했어요':'を補正しました',
 '모아 굿즈메이커':'MOAグッズメーカー',
 '투명 PNG를 올리면 칼선·타공·고리·지지대를 자동으로 만들어요. 디자인/칼선/화이트 레이어 분리로 PSD·PNG 저장까지.':'透過PNGを読み込むと、カットライン・穴・ループ・差込タブを自動生成。デザイン/カットライン/ホワイトのレイヤー分けでPSD・PNG保存まで。',
 '설정':'設定','인터페이스 컬러':'テーマカラー','언어':'言語','저장 폴더':'保存フォルダ',
@@ -24619,6 +25074,40 @@ const TR_JA={
 'HINT_sticker':'外周カットラインのみ。穴・ループなし。','HINT_sheet':'1シートに複数ステッカー、それぞれにカットライン。','HINT_ring_hole':'デザインに直接穴をあけます。','HINT_ring_tab':'デザインの上にループタブを付けます。','HINT_stand':'下に差込タブ、別パーツの台座を作ります。','HINT_korotto':'底を平らに厚くして、それ自体で自立します。','HINT_acrylic':'外周カットラインのみ（アクリル用）。',
 };
 const TR_ZH={
+'화이트 ↔ 그림':'白版↔图像',
+'평균':'平均',
+'빠짐':'缺失',
+'넘침':'溢出',
+'그림의':'占图像',
+'설정 때문이에요. 그림과 똑같이 맞추려면 0으로 두세요.':'的设置导致的。想与图像完全一致请设为 0。',
+'여백은 0인데도 벌어져 있어요 — 화이트 형식을 래스터로 바꾸면 그림과 픽셀 단위로 일치해요.':'留白为 0 仍有偏差 — 把白版格式改为栅格即可与图像逐像素一致。',
+'그림 회전(°)':'图像旋转(°)',
+'회전':'旋转',
+'↺ 90°':'↺ 90°',
+'↻ 90°':'↻ 90°',
+'원호 끝 라운드':'弧线末端圆角',
+'원호 끝이 각져요 — 바닥 모서리 라운드를 올려보세요':'弧线末端是尖角 — 试着调高底角圆角',
+'바닥이 넓어서 흔들림 세기보다 바닥 폭이 반지름을 결정했어요.':'底部较宽，半径由底宽而非摇晃强度决定。',
+'바닥 형태':'底部形状',
+'일반 (평평한 바닥)':'普通（平底）',
+'오뚝이 (둥근 바닥)':'不倒翁（弧形底）',
+'흔들림 세기':'摇晃强度',
+'바닥 반지름 직접 지정':'手动指定底部半径',
+'바닥 반지름(mm)':'底部半径(mm)',
+'⚡ 자동 보정':'⚡ 自动修正',
+'바닥 반지름':'底部半径',
+'무게중심 높이':'重心高度',
+'자동 복원':'自动回正',
+'여유':'余量',
+'최대 흔들림':'最大倾角',
+'바닥 볼록':'底部凸起',
+'무게중심이 원호 중심보다 높아 안 돌아와요':'重心高于圆弧中心，无法自动回正',
+'원호가 바닥 평면보다 깊어 발이 깎일 수 있어요':'圆弧比平底带更深，脚部可能被切掉',
+'바닥이 좁아 거의 흔들리지 않아요':'底部太窄，几乎不会摇晃',
+'무게중심이 좌우로 치우쳐 기울어진 채로 서요':'重心偏向一侧，会倾斜着站立',
+'바닥을 둥글게 깎아 흔들리다 제자리로 돌아오게 만들어요. 이미지를 올리면 무게중심을 재서 반지름을 잡아줘요.':'把底部削成弧形，摇晃后自动回正。上传图片后会根据重心计算半径。',
+'더 보정할 게 없어요':'没有需要修正的地方',
+'보정했어요':'已修正',
 '모아 굿즈메이커':'MOA谷子工具箱',
 '투명 PNG를 올리면 칼선·타공·고리·지지대를 자동으로 만들어요. 디자인/칼선/화이트 레이어 분리로 PSD·PNG 저장까지.':'上传透明PNG即可自动生成刀线、打孔、挂环和插脚。设计/刀线/白墨分层，支持导出PSD·PNG。',
 '설정':'设置','인터페이스 컬러':'界面颜色','언어':'语言','저장 폴더':'保存文件夹',

@@ -3,6 +3,17 @@ const path = require('path');
 const fs = require('fs');
 const os = require('os');
 
+function isMacOSTahoe() {
+  return process.platform === 'darwin' && parseInt(String(os.release() || '0').split('.')[0], 10) >= 25;
+}
+
+// Tahoe: WindowServer/GPU 충돌(#48376 계열) — 크래시 후가 아니라 시작부터 소프트웨어 렌더링
+if (isMacOSTahoe()) {
+  app.disableHardwareAcceleration();
+  app.commandLine.appendSwitch('disable-gpu');
+  app.commandLine.appendSwitch('disable-gpu-compositing');
+}
+
 // ===== 부팅 로그 — 창이 안 뜨는 환경 진단용 =====
 // 사용자 안내: Win+R → %TEMP% → moa-goods-maker-boot.log 파일을 보내주세요
 const BOOT_LOG = path.join(os.tmpdir(), 'moa-goods-maker-boot.log');
@@ -12,7 +23,7 @@ function blog(msg) {
   try { console.log(line.trim()); } catch (e) {}
 }
 try { if (fs.existsSync(BOOT_LOG) && fs.statSync(BOOT_LOG).size > 512 * 1024) fs.unlinkSync(BOOT_LOG); } catch (e) {}
-blog(`===== 시작: v${app.getVersion()} / electron ${process.versions.electron} / ${process.platform} ${os.release()} / argv: ${process.argv.slice(1).join(' ')}`);
+blog(`===== 시작: v${app.getVersion()} / electron ${process.versions.electron} / ${process.platform} ${os.release()}${isMacOSTahoe() ? ' [Tahoe]' : ''} / sandboxOff=${process.env.ELECTRON_DISABLE_SANDBOX || '0'} / argv: ${process.argv.slice(1).join(' ')}`);
 
 // ===== 단일 인스턴스 — 좀비 프로세스가 쌓여 새 창이 안 뜨는 상황 방지 =====
 const gotLock = app.requestSingleInstanceLock();
@@ -28,7 +39,8 @@ app.on('second-instance', () => {
 
 // ===== GPU 자동 폴백 — GPU 프로세스가 죽는 환경에서 소프트웨어 렌더링으로 =====
 const GPU_FLAG = path.join(app.getPath('userData'), 'disable-gpu.flag');
-let gpuDisabled = false;
+let gpuDisabled = isMacOSTahoe();
+if (gpuDisabled) blog('Tahoe: 하드웨어 가속 사전 비활성');
 try {
   if (fs.existsSync(GPU_FLAG) || process.argv.includes('--disable-gpu')) {
     app.disableHardwareAcceleration();
