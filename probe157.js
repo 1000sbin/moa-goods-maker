@@ -1,1 +1,0 @@
-process.env.ELECTRON_DISABLE_SANDBOX='1';
