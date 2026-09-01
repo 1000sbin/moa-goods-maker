@@ -21957,7 +21957,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
           <button data-t="sheet"><b>⠿</b>스티커 시트</button>
           <button data-t="ring_hole" class="on"><b>◎</b>키링 · 구멍</button>
           <button data-t="ring_tab"><b>♲</b>키링 · 고리</button>
-          <button data-t="stand"><b>ᐃ</b>스탠드</button>
+          <button data-t="stand"><b>ᐃ</b>스탠드 · 받침 포함</button>
+          <button data-t="stand" data-nb="1"><b>ᐞ</b>스탠드 · 받침 없이</button>
           <button data-t="korotto"><b>●</b>코롯토</button>
           <button data-t="acrylic"><b>◇</b>일반 아크릴</button>
         </div>
@@ -22034,12 +22035,29 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
         <button class="btn ghost" id="tabAuto">자동 위치로</button>
         <label class="row" style="margin-top:10px">촉 너비(mm) <input type="number" id="tabW" value="15" min="4" max="60" step="1"></label>
         <label class="row">촉 높이(mm) <input type="number" id="tabH" value="8" min="3" max="30" step="1"></label>
-        <label class="row">받침 모양
+        <label class="row" style="margin-top:10px">받침 만드는 방법 <span class="tip" data-tip="도형: 사각형·타원 받침을 자동으로 만들어요. 별도 이미지: 받침 그림을 따로 올려 그 실루엣으로 만들어요 (받침에도 그림이 인쇄돼요). 그림에서 잘라내기: 지금 그림에 받침을 떨어뜨려 같이 그려둔 경우 그 조각을 씁니다."></span>
+          <select id="baseSrc"><option value="shape">도형 자동 생성</option><option value="upload">별도 이미지 올리기</option><option value="art">지금 그림에서 잘라내기</option></select>
+        </label>
+        <div id="baseUpBox" class="hide">
+          <input type="file" id="baseImgFile" accept="image/*" hidden>
+          <button class="btn ghost" id="baseImgPick">🖼 받침 그림 올리기</button>
+          <button class="btn ghost hide" id="baseImgClear">✕ 받침 그림 비우기</button>
+          <label class="row" id="baseUpWRow">받침 그림 폭(mm) <span class="tip" data-tip="올린 그림 전체의 가로 실물 크기예요. 그림에 투명 여백이 있으면 실제 아크릴 조각은 그보다 작아요 — 아래에 실측 크기가 표시돼요.">?</span> <input type="number" id="baseUpW" value="55" min="10" max="200" step="0.5"></label>
+          <div class="hint" id="baseUpNote"></div>
+        </div>
+        <div id="baseArtBox" class="hide">
+          <label class="row">받침 조각
+            <select id="basePick"><option value="auto">자동 인식</option></select>
+          </label>
+          <div class="hint" id="baseArtNote"></div>
+        </div>
+        <label class="toggle" id="baseSepRow"><input type="checkbox" id="baseSeparate"> 받침을 별도 대지로 저장 <span class="tip" data-tip="켜면 본체와 받침이 각각 자기 크기의 대지로 나가요. PDF는 페이지가 나뉘고, PNG·PSD는 본체/받침 파일이 따로 만들어져요. 인쇄소가 '대지=주문 사이즈'를 요구할 때 쓰세요. 끄면 지금처럼 한 대지 아래쪽에 받침이 붙어서 나가요."></span></label>
+        <label class="row" id="baseShapeRow">받침 모양
           <select id="baseShape"><option value="rect">사각형</option><option value="ellipse">타원</option></select>
         </label>
         <label class="row" id="baseRadRow">받침 모서리 라운드(mm) <input type="number" id="baseRad" value="3" min="0" max="20" step="0.5"></label>
-        <label class="row">받침 폭(mm) <input type="number" id="baseW" value="55" min="15" max="140" step="1"></label>
-        <label class="row">받침 높이(mm) <input type="number" id="baseH" value="12" min="6" max="40" step="1"></label>
+        <label class="row" id="baseWRow">받침 폭(mm) <input type="number" id="baseW" value="55" min="15" max="140" step="1"></label>
+        <label class="row" id="baseHRow">받침 높이(mm) <input type="number" id="baseH" value="12" min="6" max="40" step="1"></label>
         <label class="row">아크릴 두께(mm) <input type="number" id="acr" value="3" min="1" max="6" step="0.5"></label>
         <label class="row">구멍 앞뒤(mm) <span class="tip" data-tip="받침 슬롯을 앞(−)/뒤(+)로 옮겨요. 미리보기에서 슬롯을 직접 위아래로 드래그하면 개별 조정도 돼요 (인원별 따로). 받침 벽이 얇아지지 않게 자동 제한.">?</span> <span class="v" id="slotOffV">0.0</span></label>
         <input type="range" id="slotOff" min="-10" max="10" value="0" step="0.5">
@@ -22150,7 +22168,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   <a id="updGo" href="#" target="_blank" rel="noopener" class="upd-btn">받으러 가기</a>
   <button id="updLater" class="upd-x" title="나중에">✕</button>
 </div>
-<footer class="credit"><span style="opacity:.55">모아 굿즈메이커 v1.6.3</span> · 오픈소스 고지: CREDITS.md · © 2026 Modi · X <a href="https://x.com/Modi_ing" target="_blank" rel="noopener">@Modi_ing</a> · 문의 <a href="mailto:1000sbin@gmail.com">1000sbin@gmail.com</a></footer>
+<footer class="credit"><span style="opacity:.55">모아 굿즈메이커 v1.7.0</span> · 오픈소스 고지: CREDITS.md · © 2026 Modi · X <a href="https://x.com/Modi_ing" target="_blank" rel="noopener">@Modi_ing</a> · 문의 <a href="mailto:1000sbin@gmail.com">1000sbin@gmail.com</a></footer>
 <span class="spin" id="spin">🍓 칼선 계산 중…</span>
 <div class="modal-bg" id="shapeModalBg">
   <div class="modal">
@@ -22500,7 +22518,7 @@ function planRoly(ls,k,off){ // 한 인원의 루프들 → 바닥 원호 반지
 // ===== 상태 =====
 const S={img:null,W:0,H:0,type:'ring_hole',pad:0,pW:0,pcH:0,pH:0,xImg:0,yImg:0,
   loops:[],baseLoops:[],rawBbox:null,pxmm:300/25.4,scale:1,mainMaskData:null,artMaskData:null,moveImgMode:false,
-  imgOffX:0,imgOffY:0,tabOffs:{},moveTabMode:false,tabConnectOK:true,standComps:null,korottoComps:null,rolyInfo:null,imgOrig:null,oW:0,oH:0,rot:0,
+  imgOffX:0,imgOffY:0,tabOffs:{},moveTabMode:false,tabConnectOK:true,standComps:null,korottoComps:null,rolyInfo:null,imgOrig:null,oW:0,oH:0,rot:0,baseArt:null,noBase:false,baseImg:null,baseUp:null,
   shapeX:0,shapeY:0,shapePlaced:false,moveShapeMode:false,
   holes:[],holeOffs:{},earOffs:{},dragging:null,selKind:null,selSet:new Set(),customWhite:null,slotOffs:{},anchorMin:false};
 const $=id=>document.getElementById(id);
@@ -22516,9 +22534,11 @@ async function openImages(multiple,pickerId){ // 새 파일 선택기 — 마지
       return Promise.all(hs.map(h=>h.getFile()));
     }catch(err){return null;} // 취소
   }
-  return new Promise(res=>{ // 폴백: 기존 input
-    const inp=multiple?$('batchFiles'):$('file');
-    inp.onchange=e=>res([...e.target.files]);
+  return new Promise(res=>{ // 폴백(Android·iOS·Firefox·Safari): 선택기별 전용 input — 본체/화이트/받침이 한 input을 공유하면 같은 파일 재선택 시 change가 안 떠서 조용히 무시됨
+    let inp=document.getElementById('fb_'+pickerId);
+    if(!inp){inp=document.createElement('input');inp.type='file';inp.id='fb_'+pickerId;inp.accept='image/*';inp.hidden=true;inp.multiple=!!multiple;document.body.appendChild(inp);}
+    inp.value=''; // 이전 선택 지우기 → 같은 파일을 다시 골라도 change 발생
+    inp.onchange=e=>{const fs=[...e.target.files];e.target.value='';res(fs);};
     inp.click();
   });
 }
@@ -22620,11 +22640,14 @@ function presetSizes(){
 
 // ===== 타입 선택 =====
 const HINTS={acrylic:'외곽 칼선만 만들어요 (일반 아크릴용).',sticker:'외곽 칼선만 만들어요. 타공·고리 없음.',sheet:'한 이미지 안의 여러 스티커를 각각 인식해 개별 칼선을 따요. 서로 겹치지 않게 배치된 시트용이에요.',ring_hole:'디자인에 직접 타공 구멍을 뚫어요.',
-  ring_tab:'상단에 고리(귀)를 만들고 그 안에 구멍을 뚫어요. 그림은 안 뚫려요.',stand:'하단에 촉이 생기고, 슬롯 뚫린 받침이 따로 만들어져요.',
+  ring_tab:'상단에 고리(귀)를 만들고 그 안에 구멍을 뚫어요. 그림은 안 뚫려요.',stand:'하단에 촉이 생기고, 슬롯 뚫린 받침이 따로 만들어져요. 받침 그림을 따로 올리면 그 모양으로 나와요.',
+  stand_nb:'하단에 촉만 만들어요. 받침은 안 나가요 — 이미 있거나 따로 주문할 때.',
   korotto:'하단을 평평하고 두툼하게 만들어 받침 없이 그 자체로 서는 스탠드예요.'};
 $('types').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
   [...$('types').children].forEach(x=>x.classList.remove('on'));b.classList.add('on');
-  S.type=b.dataset.t;$('typeHint').textContent=(TRS[LANG]&&TRS[LANG]['HINT_'+S.type])||HINTS[S.type];applyType();
+  S.type=b.dataset.t;S.noBase=b.dataset.nb==='1';
+  const hk='HINT_'+S.type+(S.noBase?'_nb':'');
+  $('typeHint').textContent=(TRS[LANG]&&(TRS[LANG][hk]||TRS[LANG]['HINT_'+S.type]))||HINTS[hk]||HINTS[S.type];applyType();
   S.holeOffs={};S.earOffs={};S.tabOffs={};S.slotOffs={};S.selKind=null;S.selSet=new Set();
   if(S.moveTabMode){S.moveTabMode=false;setTabBtnUI();}
   if(S.img)recompute(true);});
@@ -22644,7 +22667,7 @@ function applyType(){
   updateWhiteLabels();
   $('standGroup').classList.toggle('hide',t!=='stand');
   $('korottoGroup').classList.toggle('hide',t!=='korotto');
-  applyKorottoMode();
+  applyKorottoMode();applyBaseArtUI();
 }
 function applyKorottoMode(){
   const roly=$('korottoMode').value==='roly';
@@ -22657,6 +22680,210 @@ applyType();
 
 
 // ===== 계산 =====
+function standHasBase(){return S.type==='stand'&&!S.noBase;}
+function baseSrcMode(){ // 'shape' | 'upload' | 'art'
+  if(!standHasBase())return 'shape';
+  const v=$('baseSrc').value;
+  if(v==='upload'&&!S.baseImg)return 'shape'; // 아직 안 올렸으면 도형으로
+  return v;
+}
+function baseStripW(){ // 받침 대지의 가로 크기
+  if(baseSrcMode()==='upload')return px(+$('baseUpW').value||55);
+  return px(+$('baseW').value);
+}
+function baseStripH(){ // 받침 대지의 세로 크기
+  const m=baseSrcMode();
+  if(m==='upload')return Math.max(px(3),baseStripW()*(S.baseImg.height/Math.max(1,S.baseImg.width)));
+  if(m==='art'&&S.baseArt)return Math.max(px(3),S.baseArt.comp.maxY-S.baseArt.comp.minY+1);
+  return px(+$('baseH').value);
+}
+const BASE_WALL_MM=1.5; // 슬롯 앞뒤 벽 최소 두께 — 이보다 얇으면 꺾여서 못 씀
+function pickBaseComp(comps,labels){ // 받침답게 생긴 조각 고르기 — 납작하고 아래쪽에 있는 것
+  if(comps.length<2)return -1;
+  let best=-1,bs=-1e9;
+  comps.forEach((c,i)=>{
+    const w=c.maxX-c.minX+1,h=c.maxY-c.minY+1;
+    const ar=w/Math.max(1,h);              // 납작할수록 받침답다
+    const low=(c.maxY)/Math.max(1,S.pcH);  // 아래쪽에 있을수록 받침답다
+    const s=ar*1.6+low*2.2-(h/Math.max(1,S.pcH))*1.2;
+    if(s>bs){bs=s;best=i;}
+  });
+  return best;
+}
+function compMask(labels,id){ // 특정 조각만 남긴 마스크
+  const m=new Uint8Array(S.pW*S.pcH);
+  for(let i=0;i<m.length;i++)if(labels[i]===id)m[i]=1;
+  return m;
+}
+function planBaseArt(comp,labels,charComps,tW,acr){
+  // 받침 조각 안에 슬롯을 놓고, 앞뒤 벽이 얇으면 슬롯 주변만 살을 붙일 계획을 세운다.
+  const bm=compMask(labels,comp.id);
+  const inv=new Uint8Array(S.pW*S.pcH);
+  for(let i=0;i<inv.length;i++)inv[i]=bm[i]?0:1;
+  const depth=edt2d(inv,S.pW,S.pcH); // 조각 내부에서 바깥까지의 거리 = 그 지점의 살 두께
+  const wall=px(BASE_WALL_MM);
+  const slotW=tW+px(0.4),slotH=acr;
+  const bcx=(comp.minX+comp.maxX)/2;
+  // 캐릭터들의 촉 간격을 그대로 유지한 채 받침 가운데에 배치 (그린 대로의 간격으로 서게)
+  const cxs=charComps.map(c=>c.tabCx);
+  const mid=cxs.length?(Math.min.apply(null,cxs)+Math.max.apply(null,cxs))/2:bcx;
+  const rel=cxs.map(x=>x-mid);
+  // 슬롯 y: 조각 안에서 살이 가장 두꺼운 줄을 찾는다 (전역 슬라이더 오프셋은 그 뒤에 더함)
+  // 충분히 두꺼운 줄들 중에서 가운데에 가까운 줄 (벽 두께 우선)
+  const midY=(comp.minY+comp.maxY)/2;
+  const rows=[];
+  for(let y=comp.minY;y<=comp.maxY;y++){
+    let sc=1e9;
+    for(let k=0;k<Math.max(1,rel.length);k++){
+      const cx=bcx+(rel[k]||0);
+      sc=Math.min(sc,slotWallAt(depth,bm,cx,y,slotW,slotH));
+    }
+    rows.push({y,sc});
+  }
+  const maxW=rows.reduce((a,r)=>Math.max(a,r.sc),0);
+  const good=rows.filter(r=>r.sc>=Math.max(wall,maxW*0.8));
+  const pickFrom=good.length?good:rows;
+  let bestRow=pickFrom[0];
+  for(const r of pickFrom){
+    if(!good.length){if(r.sc>bestRow.sc)bestRow=r;}
+    else if(Math.abs(r.y-midY)<Math.abs(bestRow.y-midY))bestRow=r;
+  }
+  const bestY=bestRow.y;
+  const yOffG=px(+$('slotOff').value||0);
+  const slots=[],boss=[];
+  let minWall=1e9,fixed=0;
+  (rel.length?rel:[0]).forEach((r,k)=>{
+    const ci=charComps.length?charComps[k].__i:0;
+    const per=px(((S.slotOffs[ci]||{}).y)||0);
+    const cy=bestY+yOffG+per;
+    const cx=bcx+r;
+    const wv=slotWallAt(depth,bm,cx,cy,slotW,slotH);
+    minWall=Math.min(minWall,wv);
+    slots.push({i:ci,cx,cy,w:slotW,h:slotH,wall:wv});
+    if(wv<wall-0.51){ // 벽이 얇음 → 슬롯 주변만 캡슐로 살 붙이기
+      const need=wall-wv;
+      boss.push({cx,cy,w:slotW+wall*2,h:slotH+wall*2,grow:need});
+      fixed++;
+    }
+  });
+  return {comp,slots,boss,minWall,fixed,bm,
+    wMm:tomm(comp.maxX-comp.minX+1),hMm:tomm(comp.maxY-comp.minY+1)};
+}
+function planBaseUpload(charComps,tW,acr,off,sm){
+  // 별도로 올린 받침 그림 → 받침 대지에 배치하고 실루엣 칼선·슬롯을 만든다.
+  if(!S.baseImg)return null;
+  const sw=Math.round(baseStripW()),sh=Math.round(baseStripH());
+  const y0=S.pcH+Math.round(px(4));                 // 받침 대지 시작 y
+  const x0=Math.round((S.pW-sw)/2);
+  // 여백·둥글리기로 부풀린 칼선이 계산 캔버스 밖으로 잘리면 윤곽이 끊겨 긴 사선이 생긴다.
+  // 본체가 S.pad를 두는 것과 같은 이유로 사방에 넉넉한 패딩을 둔다.
+  const bp=Math.ceil(Math.max(off,0)+px(+$('cornerRound').value||0)+[0,0,px(0.3),px(0.8),px(1.8),px(3.2)][+$('smooth').value||0]+px(2));
+  const W=S.pW+bp*2,H=sh+bp*2;
+  const c=document.createElement('canvas');c.width=W;c.height=H;
+  const cx2=c.getContext('2d');
+  cx2.imageSmoothingEnabled=true;cx2.imageSmoothingQuality='high';
+  cx2.drawImage(S.baseImg,x0+bp,bp,sw,sh);
+  const d=cx2.getImageData(0,0,W,H).data;
+  const th=+$('thresh').value||128; // 감도 슬라이더는 이미 0~254 알파값 (백분율 아님)
+  const mode=$('bgmode').value;
+  const src=new Uint8Array(W*H);
+  for(let i=0;i<W*H;i++){
+    const a=d[i*4+3];
+    if(a<th){src[i]=0;continue;}
+    if(mode==='alpha'){src[i]=1;continue;}
+    const lum=d[i*4]*.299+d[i*4+1]*.587+d[i*4+2]*.114; // 흰 배경 모드는 본체와 같은 규칙
+    src[i]=lum<240?1:0;
+  }
+  let any=false;for(let i=0;i<W*H;i++)if(src[i]){any=true;break;}
+  if(!any)return null;
+  // 조각 bbox
+  let mnx=W,mny=H,mxx=-1,mxy=-1;
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(src[y*W+x]){if(x<mnx)mnx=x;if(x>mxx)mxx=x;if(y<mny)mny=y;if(y>mxy)mxy=y;}
+  // 슬롯 위치: 캐릭터 촉 간격을 유지하고 조각 안에서 살이 가장 두꺼운 줄에
+  const inv=new Uint8Array(W*H);
+  for(let i=0;i<W*H;i++)inv[i]=src[i]?0:1;
+  const depth=edt2d(inv,W,H);
+  const wall=px(BASE_WALL_MM),slotW=tW+px(0.4),slotH=acr;
+  const bcx=(mnx+mxx)/2;
+  const cxs=charComps.map(c2=>c2.tabCx);
+  const mid=cxs.length?(Math.min.apply(null,cxs)+Math.max.apply(null,cxs))/2:bcx;
+  const rel=cxs.length?cxs.map(x=>x-mid):[0];
+  const wallAt=(px2,py2)=>slotWallAtBuf(depth,src,W,H,px2,py2,slotW,slotH);
+  // 줄마다 벽 두께를 재고, 충분히 두꺼운 줄들 중에서 가운데에 가까운 줄을 고른다.
+  // (강도를 크게 깎아가며 가운데로 가진 않는다 — 벽 두께가 우선)
+  const midY=(mny+mxy)/2;
+  const rows=[];
+  for(let y=mny;y<=mxy;y++){
+    let sc=1e9;
+    for(const r of rel)sc=Math.min(sc,wallAt(bcx+r,y));
+    rows.push({y,sc});
+  }
+  const maxW=rows.reduce((a,r)=>Math.max(a,r.sc),0);
+  const good=rows.filter(r=>r.sc>=Math.max(wall,maxW*0.8));
+  const pickFrom=good.length?good:rows;
+  let bestRow=pickFrom[0];
+  for(const r of pickFrom){
+    if(!good.length){if(r.sc>bestRow.sc)bestRow=r;}
+    else if(Math.abs(r.y-midY)<Math.abs(bestRow.y-midY))bestRow=r;
+  }
+  const bestY=bestRow.y;
+  const yOffG=px(+$('slotOff').value||0);
+  const slots=[],boss=[];
+  let minWall=1e9,fixed=0;
+  rel.forEach((r,k)=>{
+    const ci=charComps.length?charComps[k].__i:0;
+    const per=px(((S.slotOffs[ci]||{}).y)||0);
+    const cyL=bestY+yOffG+per, cxL=bcx+r;
+    const wv=wallAt(cxL,cyL);
+    minWall=Math.min(minWall,wv);
+    slots.push({i:ci,cx:cxL-bp,cy:cyL-bp+y0,w:slotW,h:slotH,wall:wv}); // 패딩 제거 + 판 좌표로 변환
+    if(wv<wall-0.51){boss.push({cx:cxL,cy:cyL,w:slotW+wall*2,h:slotH+wall*2});fixed++;}
+  });
+  // 칼선: 본체와 같은 다듬기(여백·둥글리기)로 실루엣 윤곽
+  let MT=src;
+  if(boss.length){
+    MT=new Uint8Array(W*H);MT.set(src);
+    for(const b of boss){
+      const r=b.h/2;
+      stampRect(MT,W,H,b.cx-b.w/2+r,b.cy-b.h/2,b.cx+b.w/2-r,b.cy+b.h/2);
+      stampCircle(MT,W,H,b.cx-b.w/2+r,b.cy,r);
+      stampCircle(MT,W,H,b.cx+b.w/2-r,b.cy,r);
+    }
+  }
+  let D,T;
+  if(off<0){D=signedDist2d(MT,W,H);T=off;}
+  else{D=edt2d(MT,W,H);T=Math.max(0.75,off);}
+  let loops=linkLoops(marchingSquares(D,W,H,T));
+  const minP=Math.max(12,off*1.2);
+  const smWin=[0,0,px(0.3),px(0.8),px(1.8),px(3.2)][sm]||0;
+  loops=loops.filter(l=>l.length>=4&&perim(l)>=minP)
+    .map(l=>sm>0?chaikin(l,Math.min(2,sm)):l)
+    .map(l=>smWin>1?smoothLoop(l,smWin):l)
+    .filter(l=>l.length>=3)
+    .map(l=>l.map(p=>[p[0]-bp,p[1]-bp+y0])); // 패딩 제거 + 받침 대지 위치로 이동
+  return {loops,slots,boss,minWall,fixed,x0,y0,sw,sh,mask:src,W,H,bp,
+    wMm:tomm(mxx-mnx+1),hMm:tomm(mxy-mny+1)};
+}
+function slotWallAtBuf(depth,bm,W,H,cx,cy,w,h){
+  const x0=Math.round(cx-w/2),x1=Math.round(cx+w/2),y0=Math.round(cy-h/2),y1=Math.round(cy+h/2);
+  let mn=1e9;
+  const at=(x,y)=>{if(x<0||y<0||x>=W||y>=H)return 0;const i=y*W+x;return bm[i]?depth[i]:0;};
+  for(let x=x0;x<=x1;x++)mn=Math.min(mn,at(x,y0),at(x,y1));
+  for(let y=y0;y<=y1;y++)mn=Math.min(mn,at(x0,y),at(x1,y));
+  return mn===1e9?0:mn;
+}
+function slotWallAt(depth,bm,cx,cy,w,h){ // 슬롯 테두리에서 가장 얇은 벽 두께 (px). 조각 밖이면 0
+  const x0=Math.round(cx-w/2),x1=Math.round(cx+w/2),y0=Math.round(cy-h/2),y1=Math.round(cy+h/2);
+  let mn=1e9;
+  const at=(x,y)=>{
+    if(x<0||y<0||x>=S.pW||y>=S.pcH)return 0;
+    const i=y*S.pW+x;
+    return bm[i]?depth[i]:0; // 조각 밖으로 나간 지점은 벽이 없는 것
+  };
+  for(let x=x0;x<=x1;x++){mn=Math.min(mn,at(x,y0),at(x,y1));}
+  for(let y=y0;y<=y1;y++){mn=Math.min(mn,at(x0,y),at(x1,y));}
+  return mn===1e9?0:mn;
+}
 function personComps(mask){ // '인물' 단위 성분 — 작은 파편(땋은 머리·꼬리·장식 조각)은 가장 가까운 큰 덩어리에 흡수
   const lc=labelComponents(mask,S.pW,S.pcH,Math.round(px(4)*px(4)));
   const comps=lc.comps.map(c=>Object.assign({},c));
@@ -22695,15 +22922,15 @@ function prepareSource(){
   const smLv=+$('smooth').value;
   const closeR=px(Math.max(+$('gapClose').value||0,smLv>=4?(smLv===4?3:6):0))/2; // 클로징(틈 좁히기/둥글리기 4~5) 팽창 반지름
   S.pad=Math.ceil(offPad+6+extra+cushion+closeR+2); // 팽창이 판 가장자리에 눌려 잘리지 않도록
-  const baseNeed=(S.type==='stand')?px(+$('baseW').value)+px(8):0;
+  const baseNeed=standHasBase()?(baseStripW()+px(8)):0;
   S.pW=Math.max(S.W+S.pad*2,Math.ceil(baseNeed));
   S.pcH=S.H+S.pad*2;
-  S.pH=S.pcH+((S.type==='stand')?Math.ceil(px(4)+px(+$('baseH').value)+px(5)):0); // 받침 아래 5mm 여백 — 잘려 보임 방지
+  S.pH=S.pcH+(standHasBase()?Math.ceil(px(4)+baseStripH()+px(5)):0); // 받침 아래 5mm 여백 — 잘려 보임 방지
   S.boardOn=$('boardOn').checked&&+$('boardW').value>=10&&+$('boardH').value>=10;
   if(S.boardOn){ // 대지 크기 고정: 문서 = 주문 사이즈 (인쇄소 규격)
-    S.pW=Math.max(Math.round(px(+$('boardW').value)),(S.type==='stand')?Math.ceil(baseNeed):0); // 스탠드 받침이 폭보다 넓으면 확장
+    S.pW=Math.max(Math.round(px(+$('boardW').value)),standHasBase()?Math.ceil(baseNeed):0); // 스탠드 받침이 폭보다 넓으면 확장
     S.pcH=Math.round(px(+$('boardH').value));
-    S.pH=S.pcH+((S.type==='stand')?Math.ceil(px(4)+px(+$('baseH').value)+px(5)):0); // 받침은 대지 아래에 별도 배치 (본체 대지는 지정 크기 유지)
+    S.pH=S.pcH+(standHasBase()?Math.ceil(px(4)+baseStripH()+px(5)):0); // 받침은 대지 아래에 별도 배치 (본체 대지는 지정 크기 유지)
   }
   S.xImg=Math.round((S.pW-S.W)/2)+offXpx;
   S.yImg=(S.boardOn?Math.round((S.pcH-S.H)/2):S.pad)+offYpx;
@@ -22931,20 +23158,43 @@ function computeCore(reposition){
     S.standComps=null;S._tabStamps=null;
     if(S.type==='stand'){
       const lc=personComps(mask);
-      const comps=lc.comps.length?lc.comps:[{id:0,minX:bb.minX,minY:bb.minY,maxX:bb.maxX,maxY:bb.maxY}];
+      const all=lc.comps.length?lc.comps:[{id:0,minX:bb.minX,minY:bb.minY,maxX:bb.maxX,maxY:bb.maxY}];
+      all.forEach((c,i)=>{c.__i=i;});
+      // 받침을 그림에서 가져오는 모드: 조각 하나를 받침으로 빼고 나머지에만 촉을 붙인다
+      let comps=all,baseIdx=-1;
+      S.baseArt=null;S._baseBoss=null;S._baseWarn=null;S.baseUp=null;
+      if(baseSrcMode()==='art'){
+        if(all.length<2)S._baseWarn='need2';
+        else{
+          const pick=$('basePick').value;
+          baseIdx=(pick==='auto')?pickBaseComp(all,lc.labels):Math.min(all.length-1,Math.max(0,parseInt(pick,10)||0));
+          comps=all.filter((c,i)=>i!==baseIdx);
+          if(!comps.length){comps=all;baseIdx=-1;S._baseWarn='need2';}
+        }
+      }
+      S.baseCandidates=all.map((c,i)=>({i,wMm:+tomm(c.maxX-c.minX+1).toFixed(1),hMm:+tomm(c.maxY-c.minY+1).toFixed(1)}));
       const tWfinal=px(+$('tabW').value),tH=px(+$('tabH').value),overlap=Math.max(2,px(0.5));
       tabWfinalPx=tWfinal;
       S.tabConnectOK=true;
       S._tabStamps=[]; // 촉은 여백 팽창·필렛이 끝난 뒤 최종 크기로 찍음 (부속 = 설정값 그대로, 본체 옵션과 무연동)
       comps.forEach((c,i)=>{ // 인원별로 각자 촉 (왼쪽부터 1,2,3…)
-        const o=S.tabOffs[i]||{x:0,y:0};
-        c.autoCx=comps.length>1?bottomWidestClusterCenterL(lc.labels,c.id,S.pW,S.pcH,c):bottomWidestClusterCenter(mask,S.pW,S.pcH,c);
+        const o=S.tabOffs[c.__i]||{x:0,y:0};
+        c.autoCx=all.length>1?bottomWidestClusterCenterL(lc.labels,c.id,S.pW,S.pcH,c):bottomWidestClusterCenter(mask,S.pW,S.pcH,c);
         c.tabCx=c.autoCx+px(o.x||0);
         c.attachY=Math.max(c.minY+px(2),Math.min(c.maxY,c.maxY+px(o.y||0))); // 위로 드래그하면 엉덩이·몸통 쪽까지
         if(!checkTabOverlap(S.artMaskData,S.pW,S.pcH,c.tabCx,tWfinal,c.attachY-overlap,c.maxY))S.tabConnectOK=false;
         S._tabStamps.push({x0:c.tabCx-tWfinal/2,y0:c.attachY-overlap,x1:c.tabCx+tWfinal/2,y1:c.maxY+off+tH});
       });
       S.standComps=comps;
+      if(baseSrcMode()==='upload'){
+        S.baseUp=planBaseUpload(comps,tWfinal,px(+$('acr').value),off,+$('smooth').value);
+        if(!S.baseUp)S._baseWarn='upEmpty';
+      }
+      if(baseIdx>=0){
+        const plan=planBaseArt(all[baseIdx],lc.labels,comps,tWfinal,px(+$('acr').value));
+        S.baseArt=plan;
+        if(plan.boss.length)S._baseBoss=plan.boss; // 슬롯 주변 살 붙이기 — 촉과 같은 시점에 찍는다
+      }
     }
     S.mainMaskData=mask; // 칼선용 (고리·촉 포함 최종 실루엣)
     const sm=+$('smooth').value;
@@ -22973,10 +23223,16 @@ function computeCore(reposition){
       }
       D=edt2d(MT,S.pW,S.pcH);T=0.5; // 필렛된 형상 기준으로 등고선 재정의 (이후 이격 보증도 이 D 기준)
     }
-    if(S._tabStamps&&S._tabStamps.length){ // 촉: 여백·둥글리기·필렛이 끝난 형상에 최종 너비로 (받침 슬롯과 정확히 맞물리게)
+    if((S._tabStamps&&S._tabStamps.length)||(S._baseBoss&&S._baseBoss.length)){ // 촉·받침 살: 여백·둥글리기·필렛이 끝난 형상에 최종 크기로
       const MT3=new Uint8Array(S.pW*S.pcH);
       for(let i=0;i<MT3.length;i++)MT3[i]=D[i]<=T?1:0;
-      for(const t2 of S._tabStamps)stampRect(MT3,S.pW,S.pcH,t2.x0,t2.y0,t2.x1,t2.y1);
+      for(const t2 of (S._tabStamps||[]))stampRect(MT3,S.pW,S.pcH,t2.x0,t2.y0,t2.x1,t2.y1);
+      for(const b2 of (S._baseBoss||[])){ // 캡슐(양끝 둥근 사각) — 각지지 않게
+        const r=b2.h/2;
+        stampRect(MT3,S.pW,S.pcH,b2.cx-b2.w/2+r,b2.cy-b2.h/2,b2.cx+b2.w/2-r,b2.cy+b2.h/2);
+        stampCircle(MT3,S.pW,S.pcH,b2.cx-b2.w/2+r,b2.cy,r);
+        stampCircle(MT3,S.pW,S.pcH,b2.cx+b2.w/2-r,b2.cy,r);
+      }
       D=edt2d(MT3,S.pW,S.pcH);T=0.5;
     }
     let loops=linkLoops(marchingSquares(D,S.pW,S.pcH,T));
@@ -23031,7 +23287,22 @@ function computeCore(reposition){
     }
     S.loops=loops;
     S.baseLoops=[];
-    if(S.type==='stand'&&S.standComps){
+    if(S.type==='stand'&&S.noBase){ /* 받침 없이 — 촉만 */ }
+    else if(S.type==='stand'&&S.baseUp){ // 별도로 올린 받침 그림
+      S.slotRects=[];
+      for(const l of S.baseUp.loops)S.baseLoops.push(l);
+      for(const s2 of S.baseUp.slots){
+        S.slotRects.push({i:s2.i,cx:s2.cx,cy:s2.cy,w:s2.w,h:s2.h});
+        S.baseLoops.push(rectLoop(s2.cx,s2.cy,s2.w,s2.h));
+      }
+    }
+    else if(S.type==='stand'&&S.baseArt){ // 받침은 그림 조각의 칼선이 그대로 쓰이고, 슬롯만 뚫는다
+      S.slotRects=[];
+      for(const s2 of S.baseArt.slots){
+        S.slotRects.push({i:s2.i,cx:s2.cx,cy:s2.cy,w:s2.w,h:s2.h});
+        S.baseLoops.push(rectLoop(s2.cx,s2.cy,s2.w,s2.h));
+      }
+    }else if(S.type==='stand'&&S.standComps){
       const baseW=px(+$('baseW').value),baseH=px(+$('baseH').value),acr=px(+$('acr').value),tW=px(+$('tabW').value);
       const baseCY=S.pcH+px(4)+baseH/2;
       const bShape=$('baseShape').value;
@@ -23442,6 +23713,10 @@ function render(){
   const gdx=(S._imgDragPreview?S._imgDragPreview.dx:0)*S.scale,gdy=(S._imgDragPreview?S._imgDragPreview.dy:0)*S.scale;
   if(S._imgDragPreview)vctx.globalAlpha=0.85;
   vctx.drawImage(S.img,S.xImg*S.scale+gdx,S.yImg*S.scale+gdy,S.W*S.scale,S.H*S.scale);
+  if(S.baseUp&&S.baseImg){ // 별도로 올린 받침 그림도 받침 대지에 (미리보기 = 내보내기와 같게)
+    const b=S.baseUp;
+    vctx.drawImage(S.baseImg,b.x0*S.scale,b.y0*S.scale,b.sw*S.scale,b.sh*S.scale);
+  }
   vctx.globalAlpha=1;
   if($('whitePreview').checked&&S._whitePrevC&&!S._imgDragPreview){ // 화이트 미리보기 — 그림 '위'에 반투명 오버레이
     vctx.globalAlpha=0.45;
@@ -23559,7 +23834,10 @@ function updateInfo(){
   }
   if(hasHole())parts.push(`${t('타공')} <b>⌀${(+$('hd').value).toFixed(1)}mm</b>`);
   if(S.type==='stand'){
-    parts.push(`${t('받침')} <b>${$('baseW').value}×${$('baseH').value}mm</b>`);
+    if(S.noBase)parts.push(`<b>${t('받침 없이')}</b>`);
+    else if(S.baseUp)parts.push(`${t('받침')} <b>${t('별도 그림')} ${S.baseUp.wMm.toFixed(1)}×${S.baseUp.hMm.toFixed(1)}mm</b>`);
+    else if(S.baseArt)parts.push(`${t('받침')} <b>${t('그림에서')} ${S.baseArt.wMm.toFixed(1)}×${S.baseArt.hMm.toFixed(1)}mm</b>`);
+    else parts.push(`${t('받침')} <b>${$('baseW').value}×${$('baseH').value}mm</b>`);
     if(S.standComps&&S.standComps.length>1)parts.push(`${t('인원')} <b>${S.standComps.length}</b>`);
   }
   if(S.holeFillResult){
@@ -23585,6 +23863,7 @@ function updateInfo(){
   }
   updRolyStat();
   updWhiteFitNote();
+  updBaseArtNote();updBaseUpNote();
   if($('shapeOn').checked)parts.push(`${t('도형')} <b>${$('shapeW').value}×${$('shapeH').value}mm</b>`);
   $('anchorInfo').textContent='⚓ '+t('칼선 앵커')+' '+countAnchors()+t('개');
   $('stageInfo').innerHTML=parts.join(' · ')+(S.type==='stand'&&!S.tabConnectOK?` · <b style="color:#ff2d55">⚠ ${t('촉이 그림과 안 이어질 수 있어요, 위치를 조정해보세요')}</b>`:'');
@@ -23696,6 +23975,23 @@ $('anchorMinBtn').onclick=()=>{
 };
 $('baseShape').onchange=()=>{$('baseRadRow').style.display=$('baseShape').value==='rect'?'flex':'none';recompute(false);};
 $('baseRad').oninput=()=>recompute(false);
+$('baseSrc').onchange=()=>{applyBaseArtUI();recompute(true);};
+$('basePick').onchange=()=>recompute(true);
+$('baseUpW').onchange=()=>{if(S.img)recompute(true);};
+$('baseImgPick').onclick=async()=>{
+  const fs2=await openImages(false,'goods-base');
+  const f=fs2&&fs2[0];if(!f)return;
+  const img=await loadImageFile(f);
+  S.baseImg=img;$('baseSrc').value='upload';applyBaseArtUI();
+  if(S.img)recompute(true);else updBaseUpNote();
+};
+$('baseImgFile').onchange=async e=>{
+  const f=e.target.files&&e.target.files[0];e.target.value='';
+  if(!f)return;
+  S.baseImg=await loadImageFile(f);$('baseSrc').value='upload';applyBaseArtUI();
+  if(S.img)recompute(true);else updBaseUpNote();
+};
+$('baseImgClear').onclick=()=>{S.baseImg=null;S.baseUp=null;applyBaseArtUI();if(S.img)recompute(true);else updBaseUpNote();};
 const SHAPE_PRESETS={clip_normal:{kind:'circle',w:32,h:32,r:0},clip_wide:{kind:'rrect',w:55,h:32,r:6},clip_magnet:{kind:'circle',w:40,h:40,r:0}};
 function updateShapeRadRow(){$('shapeRadRow').style.display=$('shapeKind').value==='rrect'?'flex':'none';}
 $('shapeOn').onchange=()=>{
@@ -23861,35 +24157,113 @@ window.addEventListener('resize',()=>{if(S.img)fitAndRender();});
 // ===== 내보내기 =====
 function paintCut(ctx){ctx.lineJoin='round';ctx.lineCap='round';ctx.strokeStyle=$('cutcol').value;ctx.lineWidth=Math.max(1,px(+$('cutw').value));
   if(S._imgDragPreview)ctx.globalAlpha=0.25; // 그림 이동 중 — 놓으면 재계산
-  for(const l of S.loops)strokeLoop(ctx,l,1);for(const l of S.baseLoops)strokeLoop(ctx,l,1);
-  if(hasHole())for(const h of S.holes){ctx.beginPath();ctx.arc(h.x,h.y,px((+$('hd').value)/2),0,7);ctx.stroke();}
-  const sl=shapeLoop();
+  if(docWantsMain())for(const l of S.loops)strokeLoop(ctx,l,1);
+  if(docWantsBase())for(const l of S.baseLoops)strokeLoop(ctx,l,1);
+  if(hasHole()&&docWantsMain())for(const h of S.holes){ctx.beginPath();ctx.arc(h.x,h.y,px((+$('hd').value)/2),0,7);ctx.stroke();}
+  const sl=docWantsMain()?shapeLoop():null;
   if(sl){ctx.strokeStyle=$('shapeCol').value;strokeLoop(ctx,sl,1);ctx.strokeStyle=$('cutcol').value;}
   ctx.globalAlpha=1;}
 function maskDesignToArt(ctx){ // 흰 배경 원본: 실루엣 밖을 투명하게 (1px 페더로 가장자리 부드럽게)
   const m=S.srcMaskData||S.artMaskData;
   if($('bgmode').value!=='white'||!m)return;
-  const im=ctx.getImageData(0,0,S.pW,S.pH);const d=im.data;
+  const r0=docRect();
+  const im=ctx.getImageData(0,0,r0.w,r0.h);const d=im.data;
   const dist=edt2d(m,S.pW,S.pcH); // 원본 실루엣까지의 거리 (내부=0)
   for(let y=0;y<S.pcH;y++)for(let x=0;x<S.pW;x++){
     const i=y*S.pW+x;
+    const cx0=x-r0.x,cy0=y-r0.y;
+    if(cx0<0||cy0<0||cx0>=r0.w||cy0>=r0.h)continue; // 대지 밖은 건너뜀
+    const j=cy0*r0.w+cx0;
     if(dist[i]>0){
       const a=Math.max(0,1.5-dist[i]); // 1.5px 안쪽까지 페이드
-      d[i*4+3]=Math.min(d[i*4+3],Math.round(a*255));
+      d[j*4+3]=Math.min(d[j*4+3],Math.round(a*255));
     }
   }
   for(let y=S.pcH;y<S.pH;y++)for(let x=0;x<S.pW;x++)d[(y*S.pW+x)*4+3]=0; // 받침 영역엔 디자인 없음
   ctx.putImageData(im,0,0);
 }
-function layerCanvas(kind){const c=document.createElement('canvas');c.width=S.pW;c.height=S.pH;const ctx=c.getContext('2d');
-  if(kind==='design'||kind==='preview')ctx.drawImage(S.img,S.xImg,S.yImg,S.W,S.H);
-  if(kind==='design')maskDesignToArt(ctx); // 내보내기용 디자인은 배경 투명 보장
-  if(kind==='cut'||kind==='preview')paintCut(ctx);return c;}
-function customWhiteAlpha(){ // 업로드 화이트의 알파를 판 좌표계로
+function designRect(){ // 디자인 오브젝트가 실제로 차지하는 영역 (그림 + 업로드 받침 대지), 현재 대지 안으로 클램프
+  const R=docRect();
+  let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
+  if(docWantsMain()){x0=S.xImg;y0=S.yImg;x1=S.xImg+S.W;y1=S.yImg+S.H;}
+  const b=S.baseUp;
+  if(b&&S.baseImg&&docWantsBase()){
+    x0=Math.min(x0,b.x0);y0=Math.min(y0,b.y0);
+    x1=Math.max(x1,b.x0+b.sw);y1=Math.max(y1,b.y0+b.sh);
+  }
+  if(x1<x0)return {x:R.x,y:R.y,w:1,h:1};
+  x0=Math.max(R.x,Math.floor(x0));y0=Math.max(R.y,Math.floor(y0));
+  x1=Math.min(R.x+R.w,Math.ceil(x1));y1=Math.min(R.y+R.h,Math.ceil(y1));
+  return {x:x0,y:y0,w:Math.max(1,x1-x0),h:Math.max(1,y1-y0)};
+}
+function paintBaseStrip(ctx,kind,colorHex){ // 받침 대지(업로드 받침)의 디자인/화이트를 판 아래쪽에 그림
+  const b=S.baseUp;
+  if(!b||!S.baseImg)return;
+  if(kind==='design'||kind==='preview'){
+    ctx.save();ctx.imageSmoothingQuality='high';
+    ctx.drawImage(S.baseImg,b.x0,b.y0,b.sw,b.sh);
+    ctx.restore();
+    return;
+  }
+  if(kind!=='white')return;
+  // 화이트: 받침 그림의 알파를 그대로 쓰고 색만 교체 (본체 화이트와 같은 규칙)
+  const t=document.createElement('canvas');t.width=b.sw;t.height=b.sh;
+  const tc=t.getContext('2d');tc.imageSmoothingQuality='high';
+  tc.drawImage(S.baseImg,0,0,b.sw,b.sh);
+  const im=tc.getImageData(0,0,b.sw,b.sh),d=im.data;
+  let r=255,g=255,bl=255;
+  if(colorHex){r=parseInt(colorHex.slice(1,3),16);g=parseInt(colorHex.slice(3,5),16);bl=parseInt(colorHex.slice(5,7),16);}
+  for(let i=0;i<b.sw*b.sh;i++){const a=d[i*4+3];if(a){d[i*4]=r;d[i*4+1]=g;d[i*4+2]=bl;}}
+  tc.putImageData(im,0,0);
+  // 슬롯은 뚫리는 구멍 — 화이트 제외
+  tc.save();tc.globalCompositeOperation='destination-out';tc.fillStyle='#000';
+  for(const s2 of b.slots)tc.fillRect(s2.cx-b.x0-s2.w/2,s2.cy-b.y0-s2.h/2,s2.w,s2.h);
+  tc.restore();
+  ctx.drawImage(t,b.x0,b.y0);
+}
+// ===== 내보내기 대지 범위 =====
+// 기본은 문서 전체(본체+받침). '받침 별도 대지'를 켜면 본체용/받침용으로 나눠 두 번 내보낸다.
+let DOC=null;
+function docRect(){return DOC||{x:0,y:0,w:S.pW,h:S.pH,part:'all',name:''};}
+function withDoc(r,fn){const bak=DOC;DOC=r;try{return fn();}finally{DOC=bak;}}
+function docWantsMain(){return docRect().part!=='base';}
+function docWantsBase(){return docRect().part!=='body';}
+function baseSepOn(){
+  return standHasBase()&&$('baseSeparate').checked&&S.baseLoops.length>0&&baseSrcMode()!=='art';
+}
+function baseDocRect(){ // 받침 대지 = 받침 칼선·그림을 감싸는 사각형 + 여유
+  let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
+  for(const l of S.baseLoops)for(const p of l){
+    if(p[0]<x0)x0=p[0];if(p[0]>x1)x1=p[0];if(p[1]<y0)y0=p[1];if(p[1]>y1)y1=p[1];
+  }
+  // 그림의 투명 여백까지 넣으면 대지가 실제 조각보다 커진다 — 칼선 기준으로 잡고 여유(bleed)만 더한다
+  if(x1<x0)return {x:0,y:S.pcH,w:S.pW,h:Math.max(1,S.pH-S.pcH),part:'base',name:'받침'};
+  const pad=Math.max(px(2),px(+$('cutw').value||0.1)*2);
+  x0=Math.max(0,Math.floor(x0-pad));y0=Math.max(0,Math.floor(y0-pad));
+  x1=Math.min(S.pW,Math.ceil(x1+pad));y1=Math.min(S.pH,Math.ceil(y1+pad));
+  return {x:x0,y:y0,w:Math.max(1,x1-x0),h:Math.max(1,y1-y0),part:'base',name:'받침'};
+}
+function exportParts(){ // 내보낼 대지 목록
+  if(!baseSepOn())return [docRect()];
+  return [{x:0,y:0,w:S.pW,h:S.pcH,part:'body',name:'본체'},baseDocRect()];
+}
+function layerCanvas(kind){const r=docRect();
+  const c=document.createElement('canvas');c.width=r.w;c.height=r.h;const ctx=c.getContext('2d');
+  ctx.translate(-r.x,-r.y); // 대지 범위만큼 이동 — 본체/받침을 각자 대지로 자를 때
+  if((kind==='design'||kind==='preview')&&docWantsMain())ctx.drawImage(S.img,S.xImg,S.yImg,S.W,S.H);
+  if(kind==='design'&&docWantsMain())maskDesignToArt(ctx); // 내보내기용 디자인은 배경 투명 보장
+  if((kind==='design'||kind==='preview')&&docWantsBase())paintBaseStrip(ctx,kind); // 받침 대지는 실루엣 마스킹 뒤에 (별도 그림)
+  if(kind==='cut'||kind==='preview')paintCut(ctx);
+  ctx.setTransform(1,0,0,1,0,0);
+  return c;}
+function customWhiteAlpha(){ // 업로드 화이트의 알파를 판 좌표계로 (같은 판·같은 위치면 캐시 — 내보내기 한 번에 3~4회 호출되므로 모바일 메모리 절약)
   if(!S.customWhite)return null;
+  const cw=S.customWhite;
+  const key=[S.pW,S.pcH,S.xImg,S.yImg,S.W,S.H].join('|');
+  const c0=S._cwCache;
+  if(c0&&c0.src===cw&&c0.key===key)return c0.data;
   const t=document.createElement('canvas');t.width=S.pW;t.height=S.pcH;
   const tctx=t.getContext('2d');
-  const cw=S.customWhite;
   // 화이트가 원본 그림과 '같은 픽셀 크기'면 = 같은 캔버스에서 내보낸 짝 레이어.
   // 이때는 원본과 완전히 동일한 방식(스케일 없이 같은 좌표)으로 그려 픽셀 단위 정렬 보장.
   if(cw.width===S.W&&cw.height===S.H){
@@ -23897,10 +24271,19 @@ function customWhiteAlpha(){ // 업로드 화이트의 알파를 판 좌표계�
   }else{
     tctx.drawImage(cw,S.xImg,S.yImg,S.W,S.H);
   }
-  return tctx.getImageData(0,0,S.pW,S.pcH).data;
+  const data=tctx.getImageData(0,0,S.pW,S.pcH).data;
+  let on=0;for(let i=3;i<data.length;i+=4)if(data[i])on++;
+  S._cwCache={src:cw,key,data,on}; // on=불투명 픽셀 수. 0이면 화이트를 못 읽은 것(모바일 캔버스 한계·빈 파일)
+  return data;
+}
+function customWhiteEmpty(){ // 업로드 화이트가 있는데 판 위에 불투명 픽셀이 하나도 없음 → 조용히 빈 화이트를 내보내지 말고 알려야 함
+  if(!S.customWhite)return false;
+  customWhiteAlpha();
+  return !!(S._cwCache&&S._cwCache.on===0);
 }
 function whiteLayerCanvas(colorHex){ // 백판 = 원본 그림에서 색만 바꾼 것 (칼선 보정 무시 — 잉크 없는 곳엔 화이트도 없음)
-  const c=document.createElement('canvas');c.width=S.pW;c.height=S.pH;const ctx=c.getContext('2d');
+  const dr0=docRect();
+  const c=document.createElement('canvas');c.width=dr0.w;c.height=dr0.h;const ctx=c.getContext('2d');
   let r=255,g=255,b=255;
   if(colorHex){r=parseInt(colorHex.slice(1,3),16);g=parseInt(colorHex.slice(3,5),16);b=parseInt(colorHex.slice(5,7),16);}
   const m=S.srcMaskData||S.artMaskData;
@@ -23916,7 +24299,9 @@ function whiteLayerCanvas(colorHex){ // 백판 = 원본 그림에서 색만 바�
     if(keepCol&&cw){ // 확장부는 레이어 색, 원본 영역은 업로드한 색 그대로
       for(let i=0;i<S.pW*S.pcH;i++){const a=cw[i*4+3];if(a){d[i*4]=cw[i*4];d[i*4+1]=cw[i*4+1];d[i*4+2]=cw[i*4+2];d[i*4+3]=255;}}
     }
-    ctx.putImageData(img,0,0);return c;
+    if(docWantsMain())ctx.putImageData(img,-dr0.x,-dr0.y);
+    if(docWantsBase()){ctx.save();ctx.translate(-dr0.x,-dr0.y);paintBaseStrip(ctx,'white',colorHex||$('whiteCol').value);ctx.restore();}
+    return c;
   }
   if(cw){ // 사용자가 올린 화이트/대지
     if(keepCol){ // 스티커·시트: 업로드한 색 그대로
@@ -23933,7 +24318,8 @@ function whiteLayerCanvas(colorHex){ // 백판 = 원본 그림에서 색만 바�
   }else{
     for(let i=0;i<m.length;i++){if(m[i]){d[i*4]=r;d[i*4+1]=g;d[i*4+2]=b;d[i*4+3]=255;}}
   }
-  ctx.putImageData(img,0,0);
+  if(docWantsMain())ctx.putImageData(img,-dr0.x,-dr0.y);
+  if(docWantsBase()){ctx.save();ctx.translate(-dr0.x,-dr0.y);paintBaseStrip(ctx,'white',colorHex||$('whiteCol').value);ctx.restore();}
   return c;
 }
 function dl(url,name){const a=document.createElement('a');a.href=url;a.download=name;a.click();}
@@ -23956,7 +24342,7 @@ async function saveBlob(blob,name){ // 폴더 지정 시 그 폴더로, 아니�
   dl(URL.createObjectURL(blob),name);
 }
 const REPO='1000sbin/moa-goods-maker'; // 업데이트 확인용 저장소
-const APP_VER='1.6.3'; // 배포 시 버전 배지와 함께 갱신
+const APP_VER='1.7.0'; // 배포 시 버전 배지와 함께 갱신
 function verCmp(a,b){ // 'v1.5.7' vs '1.4.6' → 1/0/-1
   const pa=String(a).replace(/^v/,'').split('.').map(n=>parseInt(n)||0);
   const pb=String(b).replace(/^v/,'').split('.').map(n=>parseInt(n)||0);
@@ -24059,88 +24445,113 @@ $('expZip').onclick=async()=>{
   let JSZip;try{JSZip=await loadJSZip();}catch(_){showExpWarn('ZIP 모듈을 불러오지 못했어요(인터넷 필요).');return;}
   const zip=new JSZip();
   const backingAsArtZip=keepCustomColors()&&$('whiteLayer').checked;
-  if(!backingAsArtZip)zip.file('디자인.png',await canvasBlob(layerCanvas('design'))); // 칼선.png와 같은 좌표계 유지 (겹치면 정합)
-  zip.file('칼선.png',await canvasBlob(layerCanvas('cut')));
-  if($('whiteLayer').checked)zip.file(backingAsArtZip?'대지_인쇄물.png':'화이트.png',await canvasBlob(whiteLayerCanvas()));
-  zip.file('미리보기.png',await canvasBlob(layerCanvas('preview')));
+  for(const part of exportParts()){
+    const dir=part.name?part.name+'/':''; // 별도 대지면 본체/ · 받침/ 폴더로 나눔
+    const [dsg,cut,wht,prv]=withDoc(part,()=>[
+      backingAsArtZip?null:layerCanvas('design'),
+      layerCanvas('cut'),
+      $('whiteLayer').checked?whiteLayerCanvas():null,
+      layerCanvas('preview')]);
+    if(dsg)zip.file(dir+'디자인.png',await canvasBlob(dsg)); // 칼선.png와 같은 좌표계 유지 (겹치면 정합)
+    zip.file(dir+'칼선.png',await canvasBlob(cut));
+    if(wht)zip.file(dir+(backingAsArtZip?'대지_인쇄물.png':'화이트.png'),await canvasBlob(wht));
+    zip.file(dir+'미리보기.png',await canvasBlob(prv));
+  }
   const blob=await zip.generateAsync({type:'blob'});
   saveBlob(blob,'굿즈_칼선.zip');
 };
 
+function customWhiteGuard(){ // 내보내기 공통: 업로드 화이트가 비어 있으면 알리고 중단
+  if(!$('whiteLayer').checked||!customWhiteEmpty())return true;
+  showExpWarn('⚠ '+t('직접 올린 화이트에서 불투명한 픽셀을 찾지 못했어요. 자동 화이트로 대체하지 않고 내보내기를 멈췄어요 — 파일을 다시 올리거나 ✕ 자동으로 를 눌러주세요.'));
+  return false;
+}
 $('expPdf').onclick=async()=>{
   $('psdWarn').style.display='none';
+  if(!customWhiteGuard())return;
   let jspdfNS;try{jspdfNS=await loadJsPdf();}catch(_){showExpWarn('PDF 모듈을 불러오지 못했어요(인터넷 필요).');return;}
   const {jsPDF}=jspdfNS;
-  const wMm=S.pW/S.pxmm,hMm=S.pH/S.pxmm;
-  const doc=new jsPDF({unit:'mm',format:[wMm,hMm],orientation:wMm>hMm?'landscape':'portrait'});
-  const addCanvasPage=(canvas,first)=>{
-    if(!first)doc.addPage([wMm,hMm],wMm>hMm?'landscape':'portrait');
-    doc.addImage(canvas.toDataURL('image/png'),'PNG',0,0,wMm,hMm);
-  };
+  const parts=exportParts();
+  const p0=parts[0];
+  const doc=new jsPDF({unit:'mm',format:[p0.w/S.pxmm,p0.h/S.pxmm],orientation:p0.w>p0.h?'landscape':'portrait'});
   const backingAsArt=keepCustomColors()&&$('whiteLayer').checked; // 스티커+컬러 대지: 대지가 실제 인쇄물 — 인식용 디자인 페이지 생략
-  if(backingAsArt){
-    toast('🎨 '+t('대지가 인쇄 디자인을 대신해요 — 인식용 이미지 페이지는 뺐어요'));
-    doc.addImage(whiteLayerCanvas().toDataURL('image/png'),'PNG',0,0,wMm,hMm); // 1p: 대지(실제 인쇄물, 원본 색)
-  }else{ // 1p: 이미지 — 페이지는 대지 크기 그대로, 오브젝트는 그림 영역만 정위치 삽입 (일러에서 그림만 선택됨)
-    const dc2=document.createElement('canvas');dc2.width=S.W;dc2.height=S.H;
-    dc2.getContext('2d').drawImage(layerCanvas('design'),-S.xImg,-S.yImg);
-    doc.addImage(dc2.toDataURL('image/png'),'PNG',S.xImg/S.pxmm,S.yImg/S.pxmm,S.W/S.pxmm,S.H/S.pxmm);
-  }
-  // 칼선 — 진짜 벡터 패스 (일러스트레이터에서 패스로 열림, 재단기 사용 가능)
-  doc.addPage([wMm,hMm],wMm>hMm?'landscape':'portrait');
+  if(backingAsArt)toast('🎨 '+t('대지가 인쇄 디자인을 대신해요 — 인식용 이미지 페이지는 뺐어요'));
   const hex2rgb=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
-  const mm=v=>v/S.pxmm;
-  doc.setLineWidth(+$('cutw').value);
-  const cm=$('cutColorMode').value;
-  const setCut=()=>{
-    if(cm==='m100')doc.setDrawColor(0,1,0,0); // CMYK M100
-    else if(cm==='c100')doc.setDrawColor(1,0,0,0);
-    else if(cm==='k100')doc.setDrawColor(0,0,0,1);
-    else{const [r2,g2,b2]=hex2rgb($('cutcol').value);doc.setDrawColor(r2,g2,b2);}
-  };
-  setCut();
-  const drawLoopVec=l=>{ // 곡선 베지어로 그리기 (일러에서 매끈한 패스로 열림)
-    const knots=toBezierKnots(loopForPath(l),l);if(knots.length<2)return;
-    const P=k=>k.points,n=knots.length;
-    const ops=[{op:'m',c:[mm(P(knots[0])[2]),mm(P(knots[0])[3])]}];
-    for(let i=0;i<n;i++){
-      const a=P(knots[i]),b=P(knots[(i+1)%n]);
-      ops.push({op:'c',c:[mm(a[4]),mm(a[5]),mm(b[0]),mm(b[1]),mm(b[2]),mm(b[3])]});
-    }
-    ops.push({op:'h'});
-    doc.path(ops);doc.stroke();
-  };
-  S.loops.forEach(drawLoopVec);S.baseLoops.forEach(drawLoopVec);
-  if(hasHole()){const hr=mm(px((+$('hd').value)/2));for(const h of S.holes)doc.circle(mm(h.x),mm(h.y),hr,'S');}
-  const slv=shapeLoop();
-  if(slv){const [sr,sg,sb]=hex2rgb($('shapeCol').value);doc.setDrawColor(sr,sg,sb);drawLoopVec(slv);setCut();}
-  if($('whiteLayer').checked&&!backingAsArt){ // 3p: 화이트(백판) — 단색이면 벡터 면, 그라데이션이면 농도 보존 위해 이미지
-    doc.addPage([wMm,hMm],wMm>hMm?'landscape':'portrait');
-    const ic=$('whiteInkCol').value;
-    const icBright=parseInt(ic.slice(1,3),16)>244&&parseInt(ic.slice(3,5),16)>244&&parseInt(ic.slice(5,7),16)>244;
-    const pdfWhiteCol=icBright?$('whiteCol').value:ic; // 흰색이면 화면에 안 보이니 표시색으로
-    const wFmt=$('whiteFormat').value;
-    const wGrad=whiteHasGradient()||keepCustomColors(); // 컬러 대지도 색 보존 위해 래스터
-    if(wGrad&&wFmt!=='raster')toast('🎨 '+t('화이트에 농도(그라데이션) 감지 — 패스 대신 이미지로 내보냈어요'));
-    const wl=(wGrad||wFmt==='raster')?[]:whiteVectorLoops();
-    if(wl.length&&doc.path&&doc.fillEvenOdd){
-      const [wr,wg,wb]=hex2rgb(pdfWhiteCol);doc.setFillColor(wr,wg,wb);
-      const ops=[];
-      for(const l of wl){
-        const knots=withWhiteFit(()=>toBezierKnots(loopForPath(l),l)); // 화이트 단순화 설정 반영
-        if(knots.length<2)continue;
-        const P=k2=>k2.points,n2=knots.length;
-        ops.push({op:'m',c:[mm(P(knots[0])[2]),mm(P(knots[0])[3])]});
-        for(let i=0;i<n2;i++){
-          const a=P(knots[i]),b=P(knots[(i+1)%n2]);
-          ops.push({op:'c',c:[mm(a[4]),mm(a[5]),mm(b[0]),mm(b[1]),mm(b[2]),mm(b[3])]});
+  let firstPage=true;
+  for(const part of parts){
+    withDoc(part,()=>{
+      const R=docRect();
+      const wMm=R.w/S.pxmm,hMm=R.h/S.pxmm;
+      const mmx=v=>(v-R.x)/S.pxmm, mmy=v=>(v-R.y)/S.pxmm, mmr=v=>v/S.pxmm; // 대지 원점 기준
+      const newPage=()=>{
+        if(firstPage){firstPage=false;return;}
+        doc.addPage([wMm,hMm],wMm>hMm?'landscape':'portrait');
+      };
+      newPage();
+      if(backingAsArt){
+        doc.addImage(whiteLayerCanvas().toDataURL('image/png'),'PNG',0,0,wMm,hMm); // 대지(실제 인쇄물, 원본 색)
+      }else{ // 이미지 — 페이지는 대지 크기 그대로, 오브젝트는 그림 영역만 정위치 삽입 (일러에서 그림만 선택됨)
+        const dr=designRect();
+        const dc2=document.createElement('canvas');dc2.width=dr.w;dc2.height=dr.h;
+        dc2.getContext('2d').drawImage(layerCanvas('design'),-(dr.x-R.x),-(dr.y-R.y));
+        doc.addImage(dc2.toDataURL('image/png'),'PNG',mmx(dr.x),mmy(dr.y),dr.w/S.pxmm,dr.h/S.pxmm);
+      }
+      // 칼선 — 진짜 벡터 패스 (일러스트레이터에서 패스로 열림, 재단기 사용 가능)
+      newPage();
+      doc.setLineWidth(+$('cutw').value);
+      const cm=$('cutColorMode').value;
+      const setCut=()=>{
+        if(cm==='m100')doc.setDrawColor(0,1,0,0); // CMYK M100
+        else if(cm==='c100')doc.setDrawColor(1,0,0,0);
+        else if(cm==='k100')doc.setDrawColor(0,0,0,1);
+        else{const [r2,g2,b2]=hex2rgb($('cutcol').value);doc.setDrawColor(r2,g2,b2);}
+      };
+      setCut();
+      const drawLoopVec=l=>{ // 곡선 베지어로 그리기 (일러에서 매끈한 패스로 열림)
+        const knots=toBezierKnots(loopForPath(l),l);if(knots.length<2)return;
+        const P=k=>k.points,n=knots.length;
+        const ops=[{op:'m',c:[mmx(P(knots[0])[2]),mmy(P(knots[0])[3])]}];
+        for(let i=0;i<n;i++){
+          const a=P(knots[i]),b=P(knots[(i+1)%n]);
+          ops.push({op:'c',c:[mmx(a[4]),mmy(a[5]),mmx(b[0]),mmy(b[1]),mmx(b[2]),mmy(b[3])]});
         }
         ops.push({op:'h'});
+        doc.path(ops);doc.stroke();
+      };
+      if(docWantsMain())S.loops.forEach(drawLoopVec);
+      if(docWantsBase())S.baseLoops.forEach(drawLoopVec);
+      if(hasHole()&&docWantsMain()){const hr=mmr(px((+$('hd').value)/2));for(const h of S.holes)doc.circle(mmx(h.x),mmy(h.y),hr,'S');}
+      const slv=docWantsMain()?shapeLoop():null;
+      if(slv){const [sr,sg,sb]=hex2rgb($('shapeCol').value);doc.setDrawColor(sr,sg,sb);drawLoopVec(slv);setCut();}
+      if($('whiteLayer').checked&&!backingAsArt){ // 화이트(백판) — 단색이면 벡터 면, 그라데이션이면 농도 보존 위해 이미지
+        newPage();
+        const ic=$('whiteInkCol').value;
+        const icBright=parseInt(ic.slice(1,3),16)>244&&parseInt(ic.slice(3,5),16)>244&&parseInt(ic.slice(5,7),16)>244;
+        const pdfWhiteCol=icBright?$('whiteCol').value:ic; // 흰색이면 화면에 안 보이니 표시색으로
+        const wFmt=$('whiteFormat').value;
+        const wGrad=whiteHasGradient()||keepCustomColors(); // 컬러 대지도 색 보존 위해 래스터
+        if(wGrad&&wFmt!=='raster'&&part===parts[0])toast('🎨 '+t('화이트에 농도(그라데이션) 감지 — 패스 대신 이미지로 내보냈어요'));
+        const wl=(wGrad||wFmt==='raster')?[]:whiteVectorLoops();
+        if(wl.length&&doc.path&&doc.fillEvenOdd){
+          const [wr,wg,wb]=hex2rgb(pdfWhiteCol);doc.setFillColor(wr,wg,wb);
+          const ops=[];
+          for(const l of wl){
+            const knots=withWhiteFit(()=>toBezierKnots(loopForPath(l),l)); // 화이트 단순화 설정 반영
+            if(knots.length<2)continue;
+            const P=k2=>k2.points,n2=knots.length;
+            ops.push({op:'m',c:[mmx(P(knots[0])[2]),mmy(P(knots[0])[3])]});
+            for(let i=0;i<n2;i++){
+              const a=P(knots[i]),b=P(knots[(i+1)%n2]);
+              ops.push({op:'c',c:[mmx(a[4]),mmy(a[5]),mmx(b[0]),mmy(b[1]),mmx(b[2]),mmy(b[3])]});
+            }
+            ops.push({op:'h'});
+          }
+          doc.path(ops);doc.fillEvenOdd();
+        }else{ // 폴백: 래스터
+          doc.addImage(whiteLayerCanvas(pdfWhiteCol).toDataURL('image/png'),'PNG',0,0,wMm,hMm);
+        }
       }
-      doc.path(ops);doc.fillEvenOdd();
-    }else{ // 폴백: 래스터
-      doc.addImage(whiteLayerCanvas(pdfWhiteCol).toDataURL('image/png'),'PNG',0,0,wMm,hMm);
-    }
+    });
   }
   saveBlob(doc.output('blob'),'굿즈_칼선.pdf');
 };
@@ -24589,12 +25000,26 @@ function keepCustomColors(){ // 스티커·시트 대지 = 업로드한 색 그�
 }
 function whiteBaseMask(){ // 화이트/대지의 기준 이진 마스크 (커스텀 > 원본 실루엣)
   const cw=customWhiteAlpha();
+  let m;
   if(cw){
-    const m=new Uint8Array(S.pW*S.pcH);
+    m=new Uint8Array(S.pW*S.pcH);
     for(let i=0;i<m.length;i++)m[i]=cw[i*4+3]>=128?1:0;
-    return m;
+  }else{
+    const src=S.srcMaskData||S.artMaskData;
+    if(!src)return src;
+    if(!(S.baseArt&&S.baseArt.slots.length))return src;
+    m=new Uint8Array(src.length);m.set(src);
   }
-  return S.srcMaskData||S.artMaskData;
+  // 받침 슬롯은 뚫리는 구멍이라 화이트를 깔면 안 된다
+  if(S.baseArt&&S.baseArt.slots.length){
+    for(const s2 of S.baseArt.slots){
+      const x0=Math.round(s2.cx-s2.w/2),x1=Math.round(s2.cx+s2.w/2);
+      const y0=Math.round(s2.cy-s2.h/2),y1=Math.round(s2.cy+s2.h/2);
+      for(let y=Math.max(0,y0);y<=Math.min(S.pcH-1,y1);y++)
+        for(let x=Math.max(0,x0);x<=Math.min(S.pW-1,x1);x++)m[y*S.pW+x]=0;
+    }
+  }
+  return m;
 }
 function whiteHasGradient(){ // 화이트에 중간 농도(그라데이션)가 있는지 — 있으면 벡터 변환이 손실됨
   let data=customWhiteAlpha();
@@ -24613,14 +25038,36 @@ function whiteSimplifyEffective(){ // '단순'은 큰 굿즈에서 실물 이탈
   const artMm=S.rawBbox?tomm(Math.max(S.rawBbox.maxX-S.rawBbox.minX,S.rawBbox.maxY-S.rawBbox.minY)):0;
   return artMm<=100; // 10cm 이하에서만 단순 (그 이상은 단순 이탈이 0.3mm를 넘음)
 }
+function baseUpWhiteLoops(){ // 업로드 받침의 화이트 윤곽 (본체와 같은 규칙: 알파 실루엣 + 여백, 슬롯은 구멍)
+  const b=S.baseUp;
+  if(!b)return [];
+  const W=b.W,H=b.H;
+  let m=new Uint8Array(W*H);m.set(b.mask);
+  const wOff=px(+$('whiteOff').value||0);
+  if(Math.abs(wOff)>=0.5)m=offsetMask(m,W,H,wOff);
+  for(const s2 of b.slots){ // 슬롯 구멍 — 마스크는 패딩 좌표계라 bp만큼 되돌린다
+    const x0=Math.round(s2.cx+b.bp-s2.w/2),x1=Math.round(s2.cx+b.bp+s2.w/2);
+    const y0=Math.round(s2.cy-b.y0+b.bp-s2.h/2),y1=Math.round(s2.cy-b.y0+b.bp+s2.h/2);
+    for(let y=Math.max(0,y0);y<=Math.min(H-1,y1);y++)
+      for(let x=Math.max(0,x0);x<=Math.min(W-1,x1);x++)m[y*W+x]=0;
+  }
+  const D=edt2d(m,W,H);
+  return linkLoops(marchingSquares(D,W,H,0.5))
+    .filter(l=>l.length>=4&&perim(l)>=8)
+    .map(l=>smoothLoop(chaikin(l,2),2))
+    .filter(l=>l.length>=3)
+    .map(l=>l.map(p=>[p[0]-b.bp,p[1]-b.bp+b.y0]));
+}
 function whitePreviewCanvas(){ // 미리보기 = 실제 내보낼 형상. 벡터 형식이면 진짜 베지어 패스를 그려 단순/정밀 차이가 보이게
   const fmt=$('whiteFormat').value;
   const vecOK=(fmt==='vector'||fmt==='auto')&&!whiteHasGradient()&&!keepCustomColors();
   if(!vecOK)return whiteLayerCanvas($('whiteCol').value); // 래스터 지정·그라데이션: 렌더 그대로
   const loops=whiteVectorLoops();
   if(!loops.length)return whiteLayerCanvas($('whiteCol').value);
-  const c=document.createElement('canvas');c.width=S.pW;c.height=S.pH;
+  const dr1=docRect();
+  const c=document.createElement('canvas');c.width=dr1.w;c.height=dr1.h;
   const ctx=c.getContext('2d');
+  ctx.translate(-dr1.x,-dr1.y);
   ctx.fillStyle=$('whiteCol').value;
   ctx.beginPath();
   withWhiteFit(()=>{
@@ -24654,13 +25101,19 @@ function whiteVectorLoops(){ // 화이트/대지 실루엣의 벡터 윤곽 (구
   loops=loops.filter(l=>l.length>=4&&perim(l)>=8)
     .map(l=>smoothLoop(chaikin(l,2),2)) // 픽셀 계단만 제거(2px 고정). mm로 크게 잡으면 볼록한 디테일이 갉여 그림과 어긋남
     .filter(l=>l.length>=3);
-  return loops;
+  if(!docWantsMain())loops=[];
+  return loops.concat(docWantsBase()?baseUpWhiteLoops():[]);
+}
+function shiftPath(p,dx,dy){ // PSD 패스를 대지 원점 기준으로 이동
+  if(!dx&&!dy)return p;
+  return Object.assign({},p,{knots:p.knots.map(k=>Object.assign({},k,{
+    points:k.points.map((v,i)=>i%2===0?v-dx:v-dy)}))});
 }
 function buildCutBezierPaths(){ // 칼선 전체 → PSD 벡터 패스 목록 (도형 오버레이 제외)
-  const paths=[];
-  for(const l of S.loops)paths.push(loopToBezierPath(l));
-  for(const l of S.baseLoops)paths.push(loopToBezierPath(l));
-  if(hasHole()){const hr=px((+$('hd').value)/2);for(const h of S.holes)paths.push(circleToBezierPath(h.x,h.y,hr));}
+  const R=docRect(),paths=[];
+  if(docWantsMain())for(const l of S.loops)paths.push(shiftPath(loopToBezierPath(l),R.x,R.y));
+  if(docWantsBase())for(const l of S.baseLoops)paths.push(shiftPath(loopToBezierPath(l),R.x,R.y));
+  if(hasHole()&&docWantsMain()){const hr=px((+$('hd').value)/2);for(const h of S.holes)paths.push(shiftPath(circleToBezierPath(h.x,h.y,hr),R.x,R.y));}
   return paths;
 }
 function knotsToSvgD(knots){ // 베지어 knot → SVG C 경로
@@ -24674,12 +25127,13 @@ function knotsToSvgD(knots){ // 베지어 knot → SVG C 경로
   return d+' Z';
 }
 function buildSvgString(){
+  const R=docRect();
   const col=$('cutcol').value,w=px(+$('cutw').value).toFixed(2);let p='';
   const poly=l=>knotsToSvgD(toBezierKnots(loopForPath(l),l));
-  for(const l of S.loops)p+=`<path d="${poly(l)}" fill="none" stroke="${col}" stroke-width="${w}" stroke-linejoin="round"/>\n`;
-  for(const l of S.baseLoops)p+=`<path d="${poly(l)}" fill="none" stroke="${col}" stroke-width="${w}"/>\n`;
-  if(hasHole())for(const h of S.holes)p+=`<circle cx="${h.x.toFixed(2)}" cy="${h.y.toFixed(2)}" r="${px((+$('hd').value)/2).toFixed(2)}" fill="none" stroke="${col}" stroke-width="${w}"/>\n`;
-  const sl=shapeLoop();
+  if(docWantsMain())for(const l of S.loops)p+=`<path d="${poly(l)}" fill="none" stroke="${col}" stroke-width="${w}" stroke-linejoin="round"/>\n`;
+  if(docWantsBase())for(const l of S.baseLoops)p+=`<path d="${poly(l)}" fill="none" stroke="${col}" stroke-width="${w}"/>\n`;
+  if(hasHole()&&docWantsMain())for(const h of S.holes)p+=`<circle cx="${h.x.toFixed(2)}" cy="${h.y.toFixed(2)}" r="${px((+$('hd').value)/2).toFixed(2)}" fill="none" stroke="${col}" stroke-width="${w}"/>\n`;
+  const sl=docWantsMain()?shapeLoop():null;
   if(sl)p+=`<path d="${poly(sl)}" fill="none" stroke="${$('shapeCol').value}" stroke-width="${w}"/>\n`;
   if($('whiteLayer').checked&&$('whiteFormat').value==='vector'&&!whiteHasGradient()&&!keepCustomColors()){
     const wl3=whiteVectorLoops();
@@ -24699,26 +25153,38 @@ function buildSvgString(){
       p+=`<g id="white"><path d="${d3}" fill="${$('whiteCol').value}" fill-rule="evenodd" opacity="0.9"/><!-- 화이트(백판) — 인쇄소 별색으로 교체 --></g>\n`;
     }
   }
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${S.pW}" height="${S.pH}" viewBox="0 0 ${S.pW} ${S.pH}">\n<!-- 칼선(cut) stroke=${col} → 인쇄소 별색으로 교체 -->\n${p}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${R.w}" height="${R.h}" viewBox="${R.x} ${R.y} ${R.w} ${R.h}">\n<!-- 칼선(cut) stroke=${col} → 인쇄소 별색으로 교체 -->\n${p}</svg>`;
 }
 $('expSvg').onclick=()=>{
+  const parts=exportParts();
+  if(parts.length>1){ // 별도 대지: 본체·받침 각각 파일로
+    for(const p2 of parts){
+      const s2=withDoc(p2,()=>buildSvgString());
+      saveBlob(new Blob([s2],{type:'image/svg+xml'}),'굿즈_칼선_'+p2.name+'.svg');
+    }
+    return;
+  }
   saveBlob(new Blob([buildSvgString()],{type:'image/svg+xml'}),'칼선.svg');};
 
 $('expPsd').onclick=async()=>{
   $('psdWarn').style.display='none';
   let agPsd;try{agPsd=await loadAgPsd();}catch(_){
     showExpWarn('PSD 생성 모듈을 불러오지 못했어요(인터넷 필요). 대신 PNG 묶음 ZIP을 이용해 주세요.');return;}
+  for(const part of exportParts())withDoc(part,()=>{ // 동기 — withDoc은 즉시 복원되므로 await를 안에 두면 안 됨
+  const R=docRect();
+  const suffix=part.name?'_'+part.name:'';
   const dctx=layerCanvas('design').getContext('2d'),cctx=layerCanvas('cut').getContext('2d');
-  const design=dctx.getImageData(S.xImg,S.yImg,S.W,S.H); // 디자인 레이어는 이미지 영역만 (문서 안에서 left/top으로 정위치)
-  const cut=cctx.getImageData(0,0,S.pW,S.pH);
+  const dr=designRect(); // 그림 + 업로드 받침 대지를 합친 영역 (받침 그림이 잘리지 않게)
+  const design=dctx.getImageData(dr.x-R.x,dr.y-R.y,dr.w,dr.h); // 대지 안에서 left/top으로 정위치
+  const cut=cctx.getImageData(0,0,R.w,R.h);
   if($('psdColorMode').value==='cmyk'){ // CMYK 문서: 자체 라이터 (픽셀 레이어 — 벡터 패스는 SVG 병행)
-    const layersC=[{name:'디자인',left:S.xImg,top:S.yImg,imageData:design},{name:'칼선',left:0,top:0,imageData:cut}];
+    const layersC=[{name:'디자인',left:dr.x-R.x,top:dr.y-R.y,imageData:design},{name:'칼선',left:0,top:0,imageData:cut}];
     if($('whiteLayer').checked){
       const wctx2=whiteLayerCanvas().getContext('2d');
-      layersC.push({name:'화이트',left:0,top:0,imageData:wctx2.getImageData(0,0,S.pW,S.pH)});
+      layersC.push({name:'화이트',left:0,top:0,imageData:wctx2.getImageData(0,0,R.w,R.h)});
     }
-    const bufC=writeCmykPsd({width:S.pW,height:S.pH,dpi:+$('dpi').value||300,layers:layersC});
-    saveBlob(new Blob([bufC],{type:'image/vnd.adobe.photoshop'}),'굿즈_칼선_CMYK.psd');
+    const bufC=writeCmykPsd({width:R.w,height:R.h,dpi:+$('dpi').value||300,layers:layersC});
+    saveBlob(new Blob([bufC],{type:'image/vnd.adobe.photoshop'}),'굿즈_칼선_CMYK'+suffix+'.psd');
     return;
   }
   const emptyPx={width:1,height:1,data:new Uint8ClampedArray(4)}; // 패스 전용 투명 레이어
@@ -24727,25 +25193,82 @@ $('expPsd').onclick=async()=>{
     {name:'칼선 패스 (벡터)',imageData:emptyPx,vectorMask:{paths:buildCutBezierPaths()}},
     {name:'칼선',imageData:cut}];
   const slp=shapeLoop();
-  if(slp)children.unshift({name:'도형 패스 (벡터)',imageData:emptyPx,vectorMask:{paths:[loopToBezierPath(slp)]}});
+  if(slp&&docWantsMain())children.unshift({name:'도형 패스 (벡터)',imageData:emptyPx,vectorMask:{paths:[shiftPath(loopToBezierPath(slp),R.x,R.y)]}});
   if($('whiteLayer').checked){
     const wctx=whiteLayerCanvas().getContext('2d');
-    children.push({name:backingAsArtPsd?'대지 (인쇄물)':'화이트',imageData:wctx.getImageData(0,0,S.pW,S.pH)});
+    children.push({name:backingAsArtPsd?'대지 (인쇄물)':'화이트',imageData:wctx.getImageData(0,0,R.w,R.h)});
     const wFmt2=$('whiteFormat').value;
     const wl=(whiteHasGradient()||keepCustomColors()||wFmt2==='raster')?[]:whiteVectorLoops(); // 그라데이션·컬러 커스텀·래스터 지정은 패스 생략
     if(wl.length)children.unshift({name:'화이트 패스 (벡터)',imageData:emptyPx,
-      vectorMask:{paths:withWhiteFit(()=>wl.map(loopToBezierPath))}}); // 화이트 단순화 설정 반영 피팅
+      vectorMask:{paths:withWhiteFit(()=>wl.map(l=>shiftPath(loopToBezierPath(l),R.x,R.y)))}}); // 화이트 단순화 설정 반영 피팅
   }
-  if(!backingAsArtPsd)children.push({name:'디자인',left:S.xImg,top:S.yImg,imageData:design}); // 이미지 영역만 차지 (대지가 인쇄물이면 생략)
-  const psd={width:S.pW,height:S.pH,children};
+  if(!backingAsArtPsd)children.push({name:'디자인',left:dr.x-R.x,top:dr.y-R.y,imageData:design}); // 그림+받침 대지 영역만 차지
+  const psd={width:R.w,height:R.h,children};
   const dpiV=+$('dpi').value||300;
   psd.imageResources={resolutionInfo:{horizontalResolution:dpiV,horizontalResolutionUnit:'PPI',widthUnit:'Millimeters',
     verticalResolution:dpiV,verticalResolutionUnit:'PPI',heightUnit:'Millimeters'}}; // 해상도 유지 — 포토샵에서 실물 mm로 열림
-  try{const buf=agPsd.writePsd(psd);saveBlob(new Blob([buf],{type:'image/vnd.adobe.photoshop'}),'굿즈_칼선.psd');}
+  try{const buf=agPsd.writePsd(psd);saveBlob(new Blob([buf],{type:'image/vnd.adobe.photoshop'}),'굿즈_칼선'+suffix+'.psd');}
   catch(err){showExpWarn('PSD 생성 중 오류: '+err.message);}
+  });
 };
 $('whiteLayer').onchange=()=>{$('whiteOpts').style.display=$('whiteLayer').checked?'block':'none';updWhiteFitNote();};
 $('whitePreview').onchange=()=>{S._whitePrevC=($('whitePreview').checked&&S.img)?whitePreviewCanvas():null;render();};
+function applyBaseArtUI(){
+  const nb=S.type==='stand'&&S.noBase;
+  const m=nb?'none':$('baseSrc').value;
+  $('baseSrc').closest('label').style.display=nb?'none':'flex';
+  $('baseUpBox').classList.toggle('hide',m!=='upload');
+  $('baseArtBox').classList.toggle('hide',m!=='art');
+  const shape=(m==='shape');
+  for(const id of ['baseShapeRow','baseWRow','baseHRow'])$(id).style.display=shape?'flex':'none';
+  $('baseRadRow').style.display=(shape&&$('baseShape').value==='rect')?'flex':'none';
+  $('acr').closest('label').style.display=nb?'none':'flex';
+  const so=$('slotOff'); // 슬라이더는 label 밖에 있어서 직전 라벨을 같이 숨긴다
+  so.style.display=nb?'none':'';
+  if(so.previousElementSibling)so.previousElementSibling.style.display=nb?'none':'flex';
+  $('baseImgClear').classList.toggle('hide',!S.baseImg);
+  $('baseImgPick').textContent=S.baseImg?t('🖼 받침 그림 바꾸기'):t('🖼 받침 그림 올리기');
+}
+function updBaseUpNote(){
+  const n=$('baseUpNote');if(!n)return;
+  if(baseSrcMode()!=='upload'&&$('baseSrc').value!=='upload'){n.innerHTML='';return;}
+  if(!S.baseImg){n.innerHTML=t('받침으로 쓸 그림을 올려주세요. 투명 PNG면 그 실루엣대로 칼선이 나와요.');return;}
+  if(S._baseWarn==='upEmpty'){n.innerHTML=`<b style="color:#ff2d55">⚠ ${t('받침 그림에서 실루엣을 못 찾았어요. 투명 배경인지 확인해 주세요.')}</b>`;return;}
+  const b=S.baseUp;
+  if(!b){n.innerHTML='';return;}
+  const lines=[`${t('받침')} <b>${b.wMm.toFixed(1)}×${b.hMm.toFixed(1)}mm</b> · ${t('슬롯')} <b>${b.slots.length}${t('개')}</b> · ${t('앞뒤 벽')} <b>${tomm(b.minWall).toFixed(2)}mm</b>`];
+  if(b.fixed)lines.push(`<b style="color:#c85b7c">⚡ ${t('받침이 얇아서 슬롯 주변')} ${b.fixed}${t('곳에 살을 붙였어요')}</b>`);
+  else if(tomm(b.minWall)<BASE_WALL_MM*1.2)lines.push(`<span style="color:#c85b7c">${t('벽이 아슬아슬해요 — 아크릴 두께를 줄이거나 받침을 두껍게 그려주세요.')}</span>`);
+  else lines.push(`<b style="color:#2e9e5b">✓ ${t('벽 두께 충분')}</b>`);
+  n.innerHTML=lines.join('<br>');
+}
+function updBasePickOptions(){
+  const sel=$('basePick');if(!sel)return;
+  const cands=S.baseCandidates||[];
+  const key=cands.map(c=>c.i+':'+c.wMm+'x'+c.hMm).join(',');
+  if(S._bpKey===key)return;
+  S._bpKey=key;
+  const cur=sel.value;
+  sel.innerHTML='<option value="auto">'+t('자동 인식')+'</option>'
+    +cands.map(c=>`<option value="${c.i}">${t('조각')} ${c.i+1} (${c.wMm}×${c.hMm}mm)</option>`).join('');
+  sel.value=[...sel.options].some(o=>o.value===cur)?cur:'auto';
+}
+function updBaseArtNote(){
+  const n=$('baseArtNote');if(!n)return;
+  if($('baseSrc').value!=='art'||S.type!=='stand'||S.noBase){n.innerHTML='';return;}
+  updBasePickOptions();
+  if(S._baseWarn==='need2'){
+    n.innerHTML=`<b style="color:#ff2d55">⚠ ${t('떨어져 있는 조각이 하나뿐이라 받침으로 쓸 조각이 없어요. 받침을 캐릭터와 떨어뜨려 같이 그려주세요.')}</b>`;
+    return;
+  }
+  const b=S.baseArt;
+  if(!b){n.innerHTML=t('그림을 올리면 받침으로 쓸 조각을 찾아요.');return;}
+  const lines=[`${t('받침 조각')} <b>${b.wMm.toFixed(1)}×${b.hMm.toFixed(1)}mm</b> · ${t('슬롯')} <b>${b.slots.length}${t('개')}</b> · ${t('앞뒤 벽')} <b>${tomm(b.minWall).toFixed(2)}mm</b>`];
+  if(b.fixed)lines.push(`<b style="color:#c85b7c">⚡ ${t('받침이 얇아서 슬롯 주변')} ${b.fixed}${t('곳에 살을 붙였어요')}</b>`);
+  else if(tomm(b.minWall)<BASE_WALL_MM*1.2)lines.push(`<span style="color:#c85b7c">${t('벽이 아슬아슬해요 — 아크릴 두께를 줄이거나 받침을 두껍게 그려주세요.')}</span>`);
+  else lines.push(`<b style="color:#2e9e5b">✓ ${t('벽 두께 충분')}</b>`);
+  n.innerHTML=lines.join('<br>');
+}
 function updWhiteFitNote(){ // 실제로 내보낼 화이트가 그림과 얼마나 어긋나는지 실측해서 보여줌
   const n=$('whiteFitNote');if(!n)return;
   if(!($('whiteLayer').checked&&S.img&&S.srcMaskData)){n.innerHTML='';S._wfKey=null;return;}
@@ -24802,15 +25325,20 @@ $('whiteUpBtn').onclick=async()=>{
   if(!fs||!fs[0])return;
   try{
     const img=await loadImageFile(fs[0]);
-    S.customWhite=img;
+    S.customWhite=img;S._cwCache=null;
     let name='🎨 '+fs[0].name;
     if(S.img&&(img.width!==S.W||img.height!==S.H))name+=' · '+t('크기가 원본과 달라요 — 원본 위치에 맞춰 늘려 써요');
+    if(S.img&&S.pW){ // 판독 확인: 불투명 영역 비율 — 0%면 파일을 못 읽은 것
+      const cwd=customWhiteAlpha();const tot=S.pW*S.pcH;const on=(S._cwCache&&S._cwCache.on)||0;
+      name+=' · '+t('불투명')+' '+(on?Math.max(1,Math.round(on/tot*100)):0)+'%';
+      if(!on)name+=' ⚠ '+t('화이트를 읽지 못했어요 — 투명 PNG인지, 파일이 너무 크지 않은지 확인하세요');
+    }
     $('whiteUpName').textContent=name;
     $('whiteUpRow').classList.remove('hide');$('whiteUpRow').style.display='flex';
     if(!$('whiteLayer').checked){$('whiteLayer').checked=true;$('whiteLayer').onchange();}
   }catch(err){}
 };
-$('whiteUpClear').onclick=()=>{S.customWhite=null;$('whiteUpRow').style.display='none';$('whiteUpRow').classList.add('hide');};
+$('whiteUpClear').onclick=()=>{S.customWhite=null;S._cwCache=null;$('whiteUpRow').style.display='none';$('whiteUpRow').classList.add('hide');};
 
 // ===== 일괄 처리 =====
 function loadImageFile(file){return new Promise((res,rej)=>{
@@ -24892,6 +25420,36 @@ $('dirClear').onclick=async()=>{dirHandle=null;await idbSet('dirHandle',null);re
 
 // ===== 언어 (한국어/English) =====
 const TR_EN={
+'받침을 별도 대지로 저장':'Save base on its own artboard','본체':'Body','받침':'Base',
+'스탠드 · 받침 포함':'Stand · with base',
+'스탠드 · 받침 없이':'Stand · no base',
+'받침 만드는 방법':'Base source',
+'도형 자동 생성':'Auto shape',
+'별도 이미지 올리기':'Upload a separate image',
+'지금 그림에서 잘라내기':'Cut from current artwork',
+'🖼 받침 그림 올리기':'🖼 Upload base artwork',
+'🖼 받침 그림 바꾸기':'🖼 Replace base artwork',
+'✕ 받침 그림 비우기':'✕ Clear base artwork',
+'받침 그림 폭(mm)':'Base artwork width (mm)',
+'받침 없이':'No base',
+'별도 그림':'separate artwork',
+'받침으로 쓸 그림을 올려주세요. 투명 PNG면 그 실루엣대로 칼선이 나와요.':'Upload artwork for the base. A transparent PNG gives a cut line along its silhouette.',
+'받침 그림에서 실루엣을 못 찾았어요. 투명 배경인지 확인해 주세요.':'Couldn\'t find a silhouette in the base artwork — check that the background is transparent.',
+'HINT_stand_nb':'Adds only the tab at the bottom. No base is exported — for when you already have one.',
+'받침도 그림에서 가져오기':'Use artwork for the base too',
+'받침 조각':'Base piece',
+'자동 인식':'Auto-detect',
+'조각':'Piece',
+'슬롯':'Slots',
+'개':'',
+'앞뒤 벽':'Wall thickness',
+'그림에서':'from artwork',
+'벽 두께 충분':'Wall thickness OK',
+'그림을 올리면 받침으로 쓸 조각을 찾아요.':'Drop an image and the base piece will be detected.',
+'떨어져 있는 조각이 하나뿐이라 받침으로 쓸 조각이 없어요. 받침을 캐릭터와 떨어뜨려 같이 그려주세요.':'Only one separate piece found — draw the base as a piece detached from the character.',
+'받침이 얇아서 슬롯 주변':'Base was thin, so material was added around',
+'곳에 살을 붙였어요':' slot(s)',
+'벽이 아슬아슬해요 — 아크릴 두께를 줄이거나 받침을 두껍게 그려주세요.':'Walls are marginal — reduce the acrylic thickness or draw a thicker base.',
 '화이트 ↔ 그림':'White vs artwork',
 '평균':'avg',
 '빠짐':'missing',
@@ -24941,7 +25499,7 @@ const TR_EN={
 '타공':'Punch hole','지름(mm)':'Diameter (mm)','고리 벽 두께(mm)':'Loop wall (mm)','자동 위치로':'Auto position','고리 자동 위치로':'Auto loop position',
 '바닥 평평하게(mm)':'Flatten bottom (mm)','바닥 모서리 라운드(mm)':'Bottom corner radius (mm)',
 '스탠드 지지대':'Stand support','🖐 드래그로 촉 위치 옮기기':'🖐 Drag to move tab','촉 너비(mm)':'Tab width (mm)','촉 높이(mm)':'Tab height (mm)',
-'받침 모양':'Base shape','사각형':'Rectangle','타원':'Ellipse','받침 모서리 라운드(mm)':'Base corner radius (mm)','받침 폭(mm)':'Base width (mm)','받침 높이(mm)':'Base height (mm)','아크릴 두께(mm)':'Acrylic thickness (mm)',
+'받침 모양':'Base shape','사각형':'Rectangle','타원':'Ellipse','받침 모서리 라운드(mm)':'Base corner radius (mm)','받침 그림 폭(mm)':'Base artwork width (mm)','받침 높이(mm)':'Base height (mm)','아크릴 두께(mm)':'Acrylic thickness (mm)',
 '도형 추가':'Add shape','도형 칼선 표시':'Show shape cutline','프리셋':'Preset','직접 설정':'Custom','집게 · 일반형 (⌀32)':'Clip · Normal (⌀32)','집게 · 와이드형 (55×32)':'Clip · Wide (55×32)','자석형 (⌀40)':'Magnet (⌀40)',
 '모양':'Shape','원':'Circle','둥근 사각형':'Rounded rect','가로(mm)':'Width (mm)','세로(mm)':'Height (mm)','모서리 반경(mm)':'Corner radius (mm)','도형 선 색':'Shape line color',
 '🖐 드래그로 도형 옮기기':'🖐 Drag to move shape','그림 중앙으로':'Center on art',
@@ -24965,7 +25523,7 @@ const TR_EN={
 '지금 설정 그대로 여러 이미지를 일괄로 따서, 이미지별 디자인/칼선/SVG(+화이트)를 ZIP 하나로 받아요.':'Batch-processes multiple images with the current settings — one ZIP with per-image design/cutline/SVG (+white).','실물 약':'approx.','칼선 조각':'Cut pieces','여백':'Margin','받침':'Base','인원':'Figures','구멍':'Holes','개':'','메움':'filled','감지':'detected','바닥 평면':'Flat bottom','도형':'Shape',
 '메울 내부 구멍 없음':'No inner holes to fill','큰 구멍이 남아있어요 — 기준값을 올려보세요':'Large holes remain — raise the size limit',
 '일부가 여백 때문에 합쳐졌어요 — 여백을 줄여보세요':'Some merged due to margin — reduce it','촉이 그림과 안 이어질 수 있어요, 위치를 조정해보세요':'Tab may not connect to the art — adjust its position',
-'직접 만든 화이트 불러오기':'Load custom white layer','✕ 자동으로':'✕ Back to auto',
+'직접 만든 화이트 불러오기':'Load custom white layer','불투명':'opaque','화이트를 읽지 못했어요 — 투명 PNG인지, 파일이 너무 크지 않은지 확인하세요':'Could not read the white layer — check it is a transparent PNG and not too large','직접 올린 화이트에서 불투명한 픽셀을 찾지 못했어요. 자동 화이트로 대체하지 않고 내보내기를 멈췄어요 — 파일을 다시 올리거나 ✕ 자동으로 를 눌러주세요.':'No opaque pixels found in your uploaded white layer. Export was stopped instead of silently falling back to auto white — re-upload the file or press ✕ Back to auto.','✕ 자동으로':'✕ Back to auto',
 '크기가 원본과 달라요 — 원본 위치에 맞춰 늘려 써요':'Size differs from source — scaled to fit',
 '기본은 원본 그림 모양 그대로 자동 생성돼요. 부분 화이트(홀로그램·글리터 연출 등)가 필요하면 직접 만든 PNG를 올리세요 — 불투명한 부분이 화이트로 인쇄돼요. 원본과 같은 크기 권장. 농도(그라데이션) 화이트는 자동으로 이미지로 내보내져요 — 인쇄소엔 래스터 접수가 표준이에요.':'Auto-generated from the artwork by default. For partial white (holo/glitter), upload your own PNG — opaque pixels print as white ink. Same size recommended. Gradient white is auto-exported as an image — raster is the standard for print shops.',
 '화이트에 농도(그라데이션) 감지 — 패스 대신 이미지로 내보냈어요':'Gradient white detected — exported as image (density) instead of path',
@@ -24983,6 +25541,35 @@ const TR_EN={
 'HINT_sticker':'Outline cutline only. No hole or loop.','HINT_sheet':'Multiple stickers on one sheet, each with its own cutline.','HINT_ring_hole':'Punches a hole directly in the design.','HINT_ring_tab':'Adds a loop tab above the design.','HINT_stand':'Adds a tab below and a separate base piece.','HINT_korotto':'Flattens and thickens the bottom so it stands on its own.','HINT_acrylic':'Outline cutline only (for plain acrylic).',
 };
 const TR_JA={
+'받침을 별도 대지로 저장':'台座を別の台紙で保存','본체':'本体',
+'스탠드 · 받침 포함':'スタンド・台座あり',
+'스탠드 · 받침 없이':'スタンド・台座なし',
+'받침 만드는 방법':'台座の作り方',
+'도형 자동 생성':'図形を自動生成',
+'별도 이미지 올리기':'別の画像をアップ',
+'지금 그림에서 잘라내기':'今の絵から切り出す',
+'🖼 받침 그림 올리기':'🖼 台座の絵をアップ',
+'🖼 받침 그림 바꾸기':'🖼 台座の絵を変更',
+'✕ 받침 그림 비우기':'✕ 台座の絵をクリア',
+'받침 그림 폭(mm)':'台座画像の幅(mm)',
+'받침 없이':'台座なし',
+'별도 그림':'別の絵',
+'받침으로 쓸 그림을 올려주세요. 투명 PNG면 그 실루엣대로 칼선이 나와요.':'台座用の絵をアップしてください。透過PNGならそのシルエットでカットラインが出ます。',
+'받침 그림에서 실루엣을 못 찾았어요. 투명 배경인지 확인해 주세요.':'台座の絵からシルエットが見つかりません。背景が透過か確認してください。',
+'HINT_stand_nb':'下部にツメだけを作ります。台座は書き出しません — すでにある場合に。',
+'받침도 그림에서 가져오기':'台座も絵から取り込む',
+'받침 조각':'台座パーツ',
+'자동 인식':'自動認識',
+'조각':'パーツ',
+'슬롯':'スロット',
+'개':'個',
+'앞뒤 벽':'前後の壁',
+'그림에서':'絵から',
+'벽 두께 충분':'壁の厚み十分',
+'그림을 올리면 받침으로 쓸 조각을 찾아요.':'画像を入れると台座に使うパーツを探します。',
+'떨어져 있는 조각이 하나뿐이라 받침으로 쓸 조각이 없어요. 받침을 캐릭터와 떨어뜨려 같이 그려주세요.':'離れたパーツが1つだけで台座に使えません。台座をキャラから離して一緒に描いてください。',
+'곳에 살을 붙였어요':'箇所を太らせました',
+'벽이 아슬아슬해요 — 아크릴 두께를 줄이거나 받침을 두껍게 그려주세요.':'壁がぎりぎりです — アクリル厚を下げるか台座を厚く描いてください。',
 '화이트 ↔ 그림':'ホワイト↔絵',
 '평균':'平均',
 '빠짐':'不足',
@@ -25056,7 +25643,7 @@ const TR_JA={
 '지금 설정 그대로 여러 이미지를 일괄로 따서, 이미지별 디자인/칼선/SVG(+화이트)를 ZIP 하나로 받아요.':'今の設定のまま複数画像を一括処理し、画像ごとのデザイン/カットライン/SVG(+ホワイト)をZIP一つで受け取ります。','실물 약':'実寸 約','칼선 조각':'カットピース','여백':'余白','받침':'台座','인원':'人数','구멍':'穴','개':'個','메움':'埋め','감지':'検出','바닥 평면':'底面','도형':'図形',
 '메울 내부 구멍 없음':'埋める内側の穴なし','큰 구멍이 남아있어요 — 기준값을 올려보세요':'大きい穴が残っています — 上限値を上げてみてください',
 '일부가 여백 때문에 합쳐졌어요 — 여백을 줄여보세요':'余白で一部が結合しました — 余白を減らしてみてください','촉이 그림과 안 이어질 수 있어요, 위치를 조정해보세요':'タブが絵とつながらない可能性があります。位置を調整してください',
-'직접 만든 화이트 불러오기':'自作ホワイトを読み込む','✕ 자동으로':'✕ 自動に戻す',
+'직접 만든 화이트 불러오기':'自作ホワイトを読み込む','불투명':'不透明','화이트를 읽지 못했어요 — 투명 PNG인지, 파일이 너무 크지 않은지 확인하세요':'ホワイトを読み込めませんでした — 透過PNGか、ファイルが大きすぎないかご確認ください','직접 올린 화이트에서 불투명한 픽셀을 찾지 못했어요. 자동 화이트로 대체하지 않고 내보내기를 멈췄어요 — 파일을 다시 올리거나 ✕ 자동으로 를 눌러주세요.':'アップロードしたホワイトに不透明ピクセルが見つかりません。自動ホワイトに置き換えずに書き出しを中止しました — ファイルを再度読み込むか「✕ 自動に戻す」を押してください。','✕ 자동으로':'✕ 自動に戻す',
 '크기가 원본과 달라요 — 원본 위치에 맞춰 늘려 써요':'サイズが元画像と異なります — 元の位置に合わせて拡縮します',
 '기본은 원본 그림 모양 그대로 자동 생성돼요. 부분 화이트(홀로그램·글리터 연출 등)가 필요하면 직접 만든 PNG를 올리세요 — 불투명한 부분이 화이트로 인쇄돼요. 원본과 같은 크기 권장. 농도(그라데이션) 화이트는 자동으로 이미지로 내보내져요 — 인쇄소엔 래스터 접수가 표준이에요.':'既定では絵と同じ形で自動生成。部分ホワイトが必要なら自作PNGをアップ — 不透明部分が白インクで印刷。同サイズ推奨。濃度（グラデーション）ホワイトは自動的に画像で出力 — 印刷所にはラスター入稿が標準です。',
 '화이트에 농도(그라데이션) 감지 — 패스 대신 이미지로 내보냈어요':'ホワイトに濃度（グラデーション）を検出 — パスの代わりに画像で出力しました',
@@ -25074,6 +25661,36 @@ const TR_JA={
 'HINT_sticker':'外周カットラインのみ。穴・ループなし。','HINT_sheet':'1シートに複数ステッカー、それぞれにカットライン。','HINT_ring_hole':'デザインに直接穴をあけます。','HINT_ring_tab':'デザインの上にループタブを付けます。','HINT_stand':'下に差込タブ、別パーツの台座を作ります。','HINT_korotto':'底を平らに厚くして、それ自体で自立します。','HINT_acrylic':'外周カットラインのみ（アクリル用）。',
 };
 const TR_ZH={
+'받침을 별도 대지로 저장':'底座单独用一个版面保存','본체':'主体',
+'스탠드 · 받침 포함':'支架 · 含底座',
+'스탠드 · 받침 없이':'支架 · 无底座',
+'받침 만드는 방법':'底座生成方式',
+'도형 자동 생성':'自动生成图形',
+'별도 이미지 올리기':'上传单独图像',
+'지금 그림에서 잘라내기':'从当前图像裁切',
+'🖼 받침 그림 올리기':'🖼 上传底座图像',
+'🖼 받침 그림 바꾸기':'🖼 更换底座图像',
+'✕ 받침 그림 비우기':'✕ 清除底座图像',
+'받침 그림 폭(mm)':'底座图像宽度(mm)',
+'받침 없이':'无底座',
+'별도 그림':'单独图像',
+'받침으로 쓸 그림을 올려주세요. 투명 PNG면 그 실루엣대로 칼선이 나와요.':'请上传作为底座的图像。透明 PNG 会按其轮廓生成刀线。',
+'받침 그림에서 실루엣을 못 찾았어요. 투명 배경인지 확인해 주세요.':'未能在底座图像中找到轮廓，请确认背景是否透明。',
+'HINT_stand_nb':'只在底部生成插榫，不导出底座 — 适合已有底座时。',
+'받침도 그림에서 가져오기':'底座也从图像获取',
+'받침 조각':'底座部件',
+'자동 인식':'自动识别',
+'조각':'部件',
+'슬롯':'插槽',
+'개':'个',
+'앞뒤 벽':'前后壁厚',
+'그림에서':'来自图像',
+'벽 두께 충분':'壁厚充足',
+'그림을 올리면 받침으로 쓸 조각을 찾아요.':'上传图像后会自动寻找作为底座的部件。',
+'떨어져 있는 조각이 하나뿐이라 받침으로 쓸 조각이 없어요. 받침을 캐릭터와 떨어뜨려 같이 그려주세요.':'只有一个分离部件，无法用作底座。请把底座与角色分开一起画。',
+'받침이 얇아서 슬롯 주변':'底座较薄，已在插槽周围',
+'곳에 살을 붙였어요':'处加厚',
+'벽이 아슬아슬해요 — 아크릴 두께를 줄이거나 받침을 두껍게 그려주세요.':'壁厚偏紧 — 请减小亚克力厚度或把底座画厚一些。',
 '화이트 ↔ 그림':'白版↔图像',
 '평균':'平均',
 '빠짐':'缺失',
@@ -25123,7 +25740,7 @@ const TR_ZH={
 '타공':'打孔','지름(mm)':'直径(mm)','고리 벽 두께(mm)':'挂环壁厚(mm)','자동 위치로':'恢复自动位置','고리 자동 위치로':'挂环恢复自动位置',
 '바닥 평평하게(mm)':'底部压平(mm)','바닥 모서리 라운드(mm)':'底角圆角(mm)',
 '스탠드 지지대':'立牌插脚','🖐 드래그로 촉 위치 옮기기':'🖐 拖动移动插脚','촉 너비(mm)':'插脚宽度(mm)','촉 높이(mm)':'插脚高度(mm)',
-'받침 모양':'底座形状','사각형':'矩形','타원':'椭圆','받침 모서리 라운드(mm)':'底座圆角(mm)','받침 폭(mm)':'底座宽度(mm)','받침 높이(mm)':'底座高度(mm)','아크릴 두께(mm)':'亚克力厚度(mm)',
+'받침 모양':'底座形状','사각형':'矩形','타원':'椭圆','받침 모서리 라운드(mm)':'底座圆角(mm)','받침 그림 폭(mm)':'底座图像宽度(mm)','받침 높이(mm)':'底座高度(mm)','아크릴 두께(mm)':'亚克力厚度(mm)',
 '도형 추가':'添加图形','도형 칼선 표시':'显示图形刀线','프리셋':'预设','직접 설정':'自定义','집게 · 일반형 (⌀32)':'夹子·普通(⌀32)','집게 · 와이드형 (55×32)':'夹子·宽版(55×32)','자석형 (⌀40)':'磁铁款(⌀40)',
 '모양':'形状','원':'圆形','둥근 사각형':'圆角矩形','가로(mm)':'宽(mm)','세로(mm)':'高(mm)','모서리 반경(mm)':'圆角半径(mm)','도형 선 색':'图形线颜色',
 '🖐 드래그로 도형 옮기기':'🖐 拖动移动图形','그림 중앙으로':'移到图片中央',
@@ -25147,7 +25764,7 @@ const TR_ZH={
 '지금 설정 그대로 여러 이미지를 일괄로 따서, 이미지별 디자인/칼선/SVG(+화이트)를 ZIP 하나로 받아요.':'按当前设置批量处理多张图片，每张图的设计/刀线/SVG(+白墨)打包成一个ZIP。','실물 약':'实际约','칼선 조각':'刀线块','여백':'留白','받침':'底座','인원':'人数','구멍':'孔','개':'个','메움':'已填','감지':'检测到','바닥 평면':'底面','도형':'图形',
 '메울 내부 구멍 없음':'没有需要填充的内部孔洞','큰 구멍이 남아있어요 — 기준값을 올려보세요':'仍有较大孔洞 — 请调高上限值',
 '일부가 여백 때문에 합쳐졌어요 — 여백을 줄여보세요':'部分因留白合并了 — 请减小留白','촉이 그림과 안 이어질 수 있어요, 위치를 조정해보세요':'插脚可能未与图案相连，请调整位置',
-'직접 만든 화이트 불러오기':'导入自制白墨图层','✕ 자동으로':'✕ 恢复自动',
+'직접 만든 화이트 불러오기':'导入自制白墨图层','불투명':'不透明','화이트를 읽지 못했어요 — 투명 PNG인지, 파일이 너무 크지 않은지 확인하세요':'无法读取白墨图层 — 请确认是透明PNG且文件不过大','직접 올린 화이트에서 불투명한 픽셀을 찾지 못했어요. 자동 화이트로 대체하지 않고 내보내기를 멈췄어요 — 파일을 다시 올리거나 ✕ 자동으로 를 눌러주세요.':'在您上传的白墨图层中未找到不透明像素。已停止导出，不会静默改用自动白墨 — 请重新上传文件或点击「✕ 恢复自动」。','✕ 자동으로':'✕ 恢复自动',
 '크기가 원본과 달라요 — 원본 위치에 맞춰 늘려 써요':'尺寸与原图不同 — 将缩放对齐原图位置',
 '기본은 원본 그림 모양 그대로 자동 생성돼요. 부분 화이트(홀로그램·글리터 연출 등)가 필요하면 직접 만든 PNG를 올리세요 — 불투명한 부분이 화이트로 인쇄돼요. 원본과 같은 크기 권장. 농도(그라데이션) 화이트는 자동으로 이미지로 내보내져요 — 인쇄소엔 래스터 접수가 표준이에요.':'默认按图案形状自动生成。需要部分白墨时可上传自制PNG — 不透明部分印刷为白墨。建议同尺寸。含浓度渐变的白墨将自动以图像导出 — 印刷厂标准为栅格提交。',
 '화이트에 농도(그라데이션) 감지 — 패스 대신 이미지로 내보냈어요':'检测到白墨含浓度渐变 — 已以图像（浓度）而非路径导出',
