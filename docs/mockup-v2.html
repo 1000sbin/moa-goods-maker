@@ -1,0 +1,546 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>모아 굿즈메이커 2.0 — 흐름 목업</title>
+<style>
+  :root{
+    --accent:#ff3d8a;--accent-soft:#ffe3ee;--accent-ink:#ff3d8a;
+    --milk:#f6f6f8;--milk-2:var(--accent-soft);--pink:var(--accent);--pink-deep:var(--accent);
+    --ink:#1f1f24;--ink-soft:#8b8b95;--line:#ececf0;--card:#fff;--side:#fff;
+    --cut:var(--accent);--shadow:0 1px 2px rgba(0,0,0,.04),0 8px 24px rgba(0,0,0,.04);
+  }
+  body.dark{
+    --milk:#151518;--ink:#f2f2f5;--ink-soft:#8f8f9a;--line:#2a2a31;--card:#1e1e23;--side:#1a1a1f;
+    --accent-soft:rgba(255,61,138,.16);--shadow:0 8px 24px rgba(0,0,0,.35);
+  }
+  body.dark .board{background-image:linear-gradient(45deg,#24242a 25%,transparent 25%,transparent 75%,#24242a 75%),linear-gradient(45deg,#24242a 25%,transparent 25%,transparent 75%,#24242a 75%);background-color:var(--card)}
+  body.dark input,body.dark select,body.dark .choice,body.dark .chip,body.dark .btn,body.dark .item{background:var(--card);color:var(--ink)}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',sans-serif;
+    background:var(--milk);color:var(--ink);font-size:14px;line-height:1.5}
+  header{display:flex;align-items:center;gap:12px;padding:10px 18px;border-bottom:1px solid var(--line);background:var(--side)}
+  header b{font-size:15px}
+  header .note{margin-left:auto;color:var(--ink-soft);font-size:12px}
+  .app{display:grid;grid-template-columns:190px 330px 1fr;height:calc(100% - 45px)}
+
+  /* 단계 레일 */
+  .rail{border-right:1px solid var(--line);background:var(--side);padding:14px 12px;display:flex;flex-direction:column;gap:2px}
+  .rail .lbl{font-size:11px;color:var(--ink-soft);padding:2px 10px 8px}
+  .step{display:flex;gap:10px;align-items:flex-start;padding:9px 8px;border-radius:10px;border:0;background:none;
+    text-align:left;font:inherit;color:var(--ink);cursor:pointer;width:100%}
+  .step .n{width:22px;height:22px;border-radius:7px;border:1.5px solid var(--line);display:grid;place-items:center;
+    font-size:11px;font-weight:700;flex:none;color:var(--ink-soft);background:var(--card)}
+  .step .t{font-weight:600;font-size:13px}
+  .step .s{display:block;font-size:11px;color:var(--ink-soft);font-weight:400}
+  .step.done .n{background:var(--accent);border-color:var(--accent);color:#fff}
+  .step.cur{background:var(--milk)}
+  .step.cur .n{border-color:var(--accent);color:var(--accent)}
+  body.dark .step.cur{background:#24242a}
+  .step.lock{opacity:.38;cursor:not-allowed}
+  .step.hidden{display:none}
+  .rail .gap{flex:1}
+  .rail small{color:var(--ink-soft);font-size:11px;padding:0 8px}
+  .foot{border-top:1px solid var(--line);padding-top:12px;margin-top:8px;font-size:12px}
+  .seg{display:flex;gap:6px;margin-bottom:12px}
+  .seg button{flex:1;border:1px solid var(--line);background:var(--card);color:var(--ink-soft);border-radius:10px;padding:7px 0;font:inherit;font-size:12px;cursor:pointer}
+  .seg button.on{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+  .seg.lang{margin-top:6px}
+  .seg.lang button{padding:6px 0}
+  .dots{display:flex;gap:8px;margin:6px 0 14px}
+  .dot{width:16px;height:16px;border-radius:50%;border:2px solid transparent;cursor:pointer;box-sizing:content-box}
+  .dot.on{border-color:var(--ink);box-shadow:0 0 0 2px var(--card) inset}
+  .ver{display:flex;align-items:center;gap:8px;color:var(--ink-soft)}
+  .ver b{color:var(--ink)}
+  .ver .upd{margin-left:auto;border:0;background:var(--accent-soft);color:var(--accent);border-radius:8px;padding:4px 8px;font:inherit;font-size:11.5px;cursor:pointer}
+  .ver-note{color:var(--ink-soft);font-size:11.5px;margin-top:6px}
+  .news{position:fixed;left:14px;bottom:110px;width:280px;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:14px 16px;font-size:12.5px;display:none;z-index:9}
+  .news.open{display:block}
+  .news h4{margin:0 0 8px;font-size:13px}
+  .news li{margin:0 0 4px 0}
+  .news ul{padding-left:16px;margin:0 0 8px}
+  .news .x{float:right;border:0;background:none;color:var(--ink-soft);cursor:pointer;font-size:14px}
+
+  /* 단계 내용 */
+  .panel{border-right:1px solid var(--line);background:var(--side);overflow:auto;padding:18px 20px;display:flex;flex-direction:column}
+  .panel h2{font-size:17px;margin:0 0 4px}
+  .panel .lead{color:var(--ink-soft);font-size:12.5px;margin:0 0 16px}
+  .panel .body{flex:1}
+  .grp{margin-bottom:16px}
+  .grp h3{font-size:12.5px;margin:0 0 6px;color:var(--ink-soft);font-weight:600}
+  .choices{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .choice{border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--card);cursor:pointer;font:inherit;color:var(--ink);text-align:left}
+  .choice b{display:block;font-size:13.5px}
+  .choice span{font-size:11.5px;color:var(--ink-soft)}
+  .choice.on{border-color:var(--accent);background:var(--accent-soft)}
+  .choice.big{grid-column:1/-1;padding:16px 14px}
+  .choice.big b{font-size:16px}
+  .row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px dashed var(--line);font-size:13px}
+  .row:last-child{border-bottom:0}
+  .row .v{display:flex;gap:6px;align-items:center}
+  input[type=number]{width:62px;border:1px solid var(--line);border-radius:8px;padding:5px 8px;font:inherit;color:var(--ink)}
+  select{border:1px solid var(--line);border-radius:8px;padding:5px 8px;font:inherit;color:var(--ink);background:#fff}
+  .chip{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:12px;background:var(--card);cursor:pointer}
+  .chip.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+  .drop{border:1.5px dashed var(--accent);border-radius:14px;padding:22px;text-align:center;color:var(--ink-soft);background:var(--accent-soft);font-size:13px}
+  .drop b{color:var(--ink);display:block;margin-bottom:2px}
+  .hint{font-size:12px;color:var(--ink-soft);background:var(--milk);border-radius:8px;padding:8px 10px;margin-top:8px}
+  .nav{display:flex;gap:8px;padding-top:14px;border-top:1px solid var(--line);margin-top:14px}
+  .btn{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:9px 14px;font:inherit;cursor:pointer;font-weight:600}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;flex:1}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+  .empty{color:var(--ink-soft);font-size:13px;padding:30px 0;text-align:center}
+
+  /* 캔버스 */
+  .stage{position:relative;display:flex;flex-direction:column;background:var(--milk)}
+  .stage .top{display:flex;gap:8px;align-items:center;padding:10px 16px;font-size:12px;color:var(--ink-soft)}
+  .stage .top .chip{margin-left:auto}
+  .board{flex:1;margin:0 16px 12px;background:var(--card);border-radius:16px;box-shadow:var(--shadow);border:1px solid var(--line);position:relative;overflow:hidden;
+    background-image:linear-gradient(45deg,#fbf1f4 25%,transparent 25%,transparent 75%,#fbf1f4 75%),linear-gradient(45deg,#fbf1f4 25%,transparent 25%,transparent 75%,#fbf1f4 75%);
+    background-size:20px 20px;background-position:0 0,10px 10px}
+  .board svg{width:100%;height:100%}
+  .items{display:flex;gap:8px;padding:0 16px 14px;font-size:12px}
+  .item{background:var(--card);border:1.5px solid var(--line);border-radius:10px;padding:6px 10px;display:flex;gap:8px;align-items:center;cursor:pointer}
+  .item.on{border-color:var(--accent)}
+  .item i{width:14px;height:14px;border-radius:4px;display:inline-block}
+  .kbadge{display:inline-block;font-size:10px;font-weight:700;border-radius:5px;padding:1px 5px;margin-right:2px}
+  .kbadge.A{background:var(--accent-soft);color:var(--accent)}
+  .kbadge.B{background:#e8eefc;color:#3b6fd6}
+  body.dark .kbadge.B{background:#25304a}
+  .item .add{color:var(--ink-soft)}
+  .stage .cap{position:absolute;right:28px;top:52px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:12px;max-width:230px;color:var(--ink-soft)}
+  .stage .cap b{color:var(--ink);display:block}
+
+  @media (max-width:900px){
+    .app{grid-template-columns:1fr;height:auto}
+    .rail{flex-direction:row;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line)}
+    .step{width:auto;flex:none}.step .s{display:none}.rail .gap,.rail small{display:none}
+    .stage{min-height:420px}
+  }
+</style>
+</head>
+<body>
+<header><b>모아 굿즈메이커</b><span style="color:var(--ink-soft)">흐름 목업 — 버튼만 눌러보는 용도, 계산은 안 해요</span><span class="note">단계는 되돌아갈 수 있고, 아직 안 온 단계는 흐려요</span></header>
+
+<div class="app">
+  <nav class="rail"><div class="lbl">만들기</div><div id="rail" style="display:contents"></div>
+    <div class="gap"></div>
+    <div class="foot">
+      <div style="color:var(--ink-soft);font-size:11px">언어</div>
+      <div class="seg lang" id="langSeg"></div>
+      <div class="seg"><button class="on" id="thL" onclick="theme('light')">☀ 라이트</button><button id="thD" onclick="theme('dark')">☾ 다크</button></div>
+      <div style="color:var(--ink-soft);font-size:11px">포인트 컬러</div>
+      <div class="dots" id="dots"></div>
+      <div class="ver">버전 <b>v2.0.0</b><button class="upd" onclick="toggleNews()">업데이트 확인</button></div>
+      <div class="ver-note" id="verNote">최신 버전을 쓰고 있어요 ✓</div>
+    </div>
+  </nav>
+  <div class="news" id="news"><button class="x" onclick="toggleNews()">✕</button><h4>새 소식</h4>
+    <div style="color:var(--ink-soft);margin-bottom:6px">v2.0.0 · 2026.09</div>
+    <ul><li>단계별 만들기 흐름으로 개편</li><li>한 파일 안의 여러 그림을 각각 인식·이동</li><li>스티커 시트 자동 배치</li><li>스티커 여백 프리셋</li></ul>
+    <div style="color:var(--ink-soft);margin-bottom:6px">v1.7.0 · 2026.09</div>
+    <ul><li>스탠드 받침: 그림에서 잘라내기 / 따로 올리기</li><li>본체·받침 대지 나눠 저장</li><li>모바일에서 직접 만든 화이트가 무시되던 문제 수정</li></ul>
+    <a href="#" style="color:var(--accent)">전체 변경 내역 보기</a>
+  </div>
+  <section class="panel" id="panel"></section>
+  <section class="stage">
+    <div class="top"><span id="stageTitle">굿즈를 고르면 미리보기가 여기 떠요</span>
+      <span id="tools" style="margin-left:auto;display:none;gap:6px"><span class="chip" id="vDraft" onclick="P.view='draft';render()">도안</span><span class="chip" id="vFinal" onclick="P.view='final';render()">완성 미리보기</span><span style="width:8px"></span><span class="chip on">선택·이동</span><span class="chip" onclick="P.rot=(P.rot+15)%360;render()">회전 +15°</span><span class="chip" onclick="P.rot=0;render()">회전 0°</span><span class="chip">90°</span></span>
+      <span class="chip" id="unitChip">mm · 300dpi</span></div>
+    <div class="board"><svg id="svg" viewBox="0 0 600 420"></svg><div class="cap" id="cap" style="display:none"></div></div>
+    <div class="items" id="items"></div>
+  </section>
+</div>
+
+<script>
+// ===== 상태 (목업이라 최소만) =====
+const P={
+  product:null,            // sticker | acrylic
+  kind:null,               // 종류
+  base:null,               // 스탠드 받침: none | extract | upload
+  koro:'normal',           // 코롯토: normal | roly
+  img:false,               // 이미지 올렸는지
+  dpi:300,
+  cut:{off:3,round:3,gap:0,fill:true},
+  parts:{hole:true,ring:false,shape:false},
+  anchors:{show:false,min:false},
+  shape:{preset:'clip_normal',kind:'circle',w:32,h:32,r:0},
+  whitePrev:true,
+  white:{on:true,off:0,src:'auto',fmt:'vector',range:'cut'},
+  board:{on:false,w:100,h:150,split:true},
+  step:1,maxStep:1,
+  item:0,rot:0,view:'draft',
+};
+const ASSEMBLY={
+  spin:{name:'스핀 스탠드',desc:'본체 + 받침대 + 회전 모듈',items:[
+    {n:'본체',k:'A',sub:'그림에서 칼선 · 촉 없음 · 양면'},
+    {n:'받침대',k:'B',sub:'판 · 사각 70×70 / 원',tpl:'rect',w:70,h:70},
+    {n:'회전 모듈',k:'B',sub:'판 · 원 70mm (인쇄 없음)',tpl:'circle',w:70,h:70,noart:true}]},
+  diorama:{name:'디오라마 3면',desc:'좌판 + 우판 + 바닥판 · 뒷면 화이트',items:[
+    {n:'좌판',k:'B',sub:'가이드 판 · 슬롯 2',tpl:'guide',w:70,h:100},
+    {n:'우판',k:'B',sub:'가이드 판 · 슬롯 2',tpl:'guide',w:70,h:100},
+    {n:'바닥판',k:'B',sub:'가이드 판 · 홈 4',tpl:'guide',w:100,h:70},
+    {n:'캐릭터 파츠',k:'A',sub:'그림에서 칼선 · 촉',opt:true}]},
+  shaker:{name:'쉐이커 키링',desc:'앞판 + 테두리판 + 뒷판 · 안에 파츠',items:[
+    {n:'앞판',k:'B',sub:'외곽 판 · 창 영역 화이트 없음 · 타공',tpl:'shaker',w:60,h:60},
+    {n:'테두리판',k:'B',sub:'외곽 판 · 가운데 뚫림 · 타공',tpl:'shaker',w:60,h:60,cavity:true},
+    {n:'뒷판',k:'B',sub:'외곽 판 · 타공',tpl:'shaker',w:60,h:60},
+    {n:'파츠',k:'A',sub:'그림에서 칼선 · 1.5T 여러 개',multi:true}]},
+  noodle:{name:'누들 스토퍼',desc:'컵라면 뚜껑 판 + 캐릭터',items:[
+    {n:'덮개판',k:'B',sub:'판 · 컵 규격 도형',tpl:'rect',w:110,h:40},
+    {n:'캐릭터',k:'A',sub:'그림에서 칼선 · 촉'}]},
+};
+const KINDS={
+  sticker:[
+    ['single','낱장 스티커','하나씩 칼선'],
+    ['sheet','시트 스티커','한 장에 여러 개, 대지 포함'],
+  ],
+  assembly:Object.entries(ASSEMBLY).map(([k,v])=>[k,v.name,v.desc]),
+  acrylic:[
+    ['plain','일반 아크릴','외곽 칼선만'],
+    ['ring_hole','키링 (타공)','구멍 뚫기'],
+    ['ring_tab','키링 (고리)','고리 달기'],
+    ['stand','스탠드','촉 + 받침'],
+    ['korotto','코롯토','두툼한 바닥'],
+  ],
+};
+const isAsm=()=>P.product==='assembly';
+const curItems=()=>isAsm()&&P.kind?ASSEMBLY[P.kind].items:null;
+const curItem=()=>{const it=curItems();return it?it[Math.min(P.item,it.length-1)]:null;};
+const KNAME=k=>{for(const p in KINDS){const f=KINDS[p].find(x=>x[0]===k);if(f)return f[1];}return '';};
+function stepDefs(){
+  const isSt=P.product==='sticker';
+  const hasParts=P.product==='acrylic'||isAsm();
+  return [
+    {n:1,t:'제품',s:P.product?({sticker:'스티커',acrylic:'아크릴',assembly:'조립 굿즈'})[P.product]:'스티커 / 아크릴 / 조립'},
+    {n:2,t:'종류',s:P.kind?KNAME(P.kind):'이미지도 여기서'},
+    {n:3,t:isAsm()?'칼선·판':'칼선',s:P.kind?(isAsm()?'아이템마다 다름':`여백 ${P.cut.off}mm`):'여백·둥글리기'},
+    {n:4,t:'부품',s:hasParts?(isAsm()?'슬롯·타공·촉':({plain:'집게·자석 도형',ring_hole:'타공',ring_tab:'고리',stand:'촉·받침',korotto:'바닥'})[P.kind]):'스티커엔 없음',hide:P.kind&&!hasParts},
+    {n:5,t:isSt?'배경':'화이트',s:isSt?'단색 · 파일':'백판 여백·형식'},
+    {n:6,t:'저장',s:'형식·대지 크기'},
+  ];
+}
+// 단계 완료 조건
+const doneOf={1:()=>!!P.product,2:()=>!!P.kind&&P.img,3:()=>true,4:()=>true,5:()=>true,6:()=>false};
+function firstUndone(){const d=stepDefs();for(const s of d){if(s.hide)continue;if(!doneOf[s.n]())return s.n;}return 6;}
+function go(n){
+  const d=stepDefs().find(x=>x.n===n);if(!d||d.hide)return;
+  if(n>firstUndone())return;
+  P.step=n;render();
+}
+function next(){const d=stepDefs();let n=P.step;do{n++;}while(n<=6&&d[n-1].hide);if(n<=6)go(n);}
+function prev(){const d=stepDefs();let n=P.step;do{n--;}while(n>=1&&d[n-1].hide);if(n>=1)go(n);}
+
+// ===== 렌더 =====
+const $=id=>document.getElementById(id);
+function render(){renderRail();renderPanel();renderStage();}
+function renderRail(){
+  const fu=firstUndone();
+  $('rail').innerHTML=stepDefs().map(s=>`
+    <button class="step ${s.hide?'hidden':''} ${s.n===P.step?'cur':''} ${doneOf[s.n]()&&s.n!==P.step?'done':''} ${s.n>fu?'lock':''}" onclick="go(${s.n})">
+      <span class="n">${doneOf[s.n]()&&s.n!==P.step?'✓':s.n}</span>
+      <span><span class="t">${s.t}</span><span class="s">${s.s}</span></span>
+    </button>`).join('')+``;
+}
+const choice=(on,cb,label,sub,cls='')=>`<button class="choice ${on?'on':''} ${cls}" onclick="${cb}"><b>${label}</b>${sub?`<span>${sub}</span>`:''}</button>`;
+function renderPanel(){
+  const isSt=P.product==='sticker';
+  let h='';
+  if(P.step===1){
+    h=`<h2>무엇을 만들까요?</h2><p class="lead"></p><div class="body">
+      <div class="choices">
+        ${choice(P.product==='sticker',"set('product','sticker')",'스티커','','big')}
+        ${choice(P.product==='acrylic',"set('product','acrylic')",'아크릴','','big')}
+        ${choice(P.product==='assembly',"set('product','assembly')",'조립 굿즈','','big')}
+      </div></div>`;
+  }else if(P.step===2){
+    h=`<h2>${isSt?'스티커':isAsm()?'조립 굿즈':'아크릴'} 종류와 이미지</h2><p class="lead"></p><div class="body">
+      <div class="grp"><div class="choices">${KINDS[P.product].map(k=>choice(P.kind===k[0],`set('kind','${k[0]}')`,k[1],'')).join('')}</div></div>
+      ${P.kind==='stand'?`<div class="grp"><h3>받침</h3><div class="choices">
+        ${choice(P.base==='none',"set('base','none')",'받침 없음','촉만')}
+        ${choice(P.base==='extract',"set('base','extract')",'그림에서 잘라내기','그림 안에 받침이 그려져 있을 때')}
+        ${choice(P.base==='upload',"set('base','upload')",'받침 이미지 따로 올리기','')}
+      </div></div>`:''}
+      ${P.kind==='korotto'?`<div class="grp"><h3>바닥</h3><div class="choices">
+        ${choice(P.koro==='normal',"set('koro','normal')",'일반','평평한 바닥')}
+        ${choice(P.koro==='roly',"set('koro','roly')",'오뚝이','둥근 바닥, 흔들려도 돌아와요')}
+      </div></div>`:''}
+      ${isAsm()&&P.kind?`<div class="grp"><h3>구성</h3>${curItems().map((it,i)=>`<div class="row"><span><span class="kbadge ${it.k}">${it.k==='A'?'그림':'판'}</span> ${it.n}${it.opt?' <small style="color:var(--ink-soft)">(선택)</small>':''}</span><span style="font-size:11.5px;color:var(--ink-soft)">${it.sub}</span></div>`).join('')}
+        <div class="hint">판(B)은 규격 도형이거나 인쇄소 가이드 파일이에요. 그림(A)만 칼선을 계산해요.</div></div>`:''}
+      ${P.kind?`<div class="grp"><h3>${isAsm()?'그림 올리기':'이미지'}</h3>
+        ${P.img?`<div class="row"><span>🖼 ${P.kind==='sheet'?'스티커모음.png · 6개 인식됨':isAsm()?curItems().filter(x=>x.k==='A')[0].n+'.png'+(P.kind==='shaker'?' · 3개 인식됨':''):'캐릭터.png'}</span><span class="v"><span class="chip" onclick="set('img',false)">바꾸기</span></span></div>
+          <div class="hint">옮기기·회전은 오른쪽 미리보기에서 그림을 골라 직접 해요.</div>
+          <div class="row"><span>해상도</span><span class="v"><input type="number" value="${P.dpi}" onchange="P.dpi=+this.value;render()"> dpi <span style="color:var(--ink-soft);font-size:11px">파일에서 읽음</span></span></div>
+          ${P.kind==='single'?`<div class="row"><span>대지 크기</span><span class="v"><span class="chip on">자동 (칼선 + 여백)</span><span class="chip">직접</span></span></div>`:''}
+          ${P.kind==='sheet'?`<div class="row"><span>시트 크기 (mm)</span><span class="v"><select onchange="const [w,h]=this.value.split('x');P.board.w=+w;P.board.h=+h;P.board.on=true;render()"><option value="100x150">100 × 150</option><option value="148x210">A5 148 × 210</option><option value="210x297">A4 210 × 297</option><option value="0x0">직접</option></select></span></div>`:''}
+          ${P.base==='upload'?`<div class="row"><span>🖼 받침.png</span><span class="chip">바꾸기</span></div>`:''}`
+        :`<div class="drop" onclick="set('img',true)"><b>${isAsm()?curItems().filter(x=>x.k==='A')[0].n+' 그림 (투명 PNG)':'투명 PNG를 여기 놓거나 눌러서 고르기'}</b>${P.kind==='sheet'?'한 파일에 여러 개 있으면 알아서 나눠요':isAsm()?'판에 넣을 그림은 3단계에서 판을 고른 뒤 올려요':'여러 장 넣으면 아이템이 여러 개 생겨요'}</div>`}
+      </div>`:''}
+    </div>`;
+  }else if(P.step===3&&isAsm()&&curItem()&&curItem().k==='B'){
+    const it=curItem();
+    h=`<h2>${it.n} — 판</h2><p class="lead">칼선은 규격에서 나와요. 그림은 판 안에 넣고 넘치는 부분은 잘려요.</p><div class="body">
+      <div class="grp"><h3>판 모양</h3><div class="choices">
+        ${choice(it.tpl!=='guide',"",'규격 도형','원 · 사각 · 둥근 사각')}
+        ${choice(it.tpl==='guide',"",'가이드 파일 가져오기','인쇄소 SVG / PDF / PNG')}
+      </div></div>
+      ${it.tpl==='guide'?`<div class="row"><span>📄 디오라마_가이드_M.svg</span><span class="chip">바꾸기</span></div>
+        <div class="hint">가이드 파일은 인쇄소 상세페이지에서 받아요. 앱에 내장하지 않아요 — 규격이 바뀌어도 파일만 다시 올리면 돼요.</div>`
+      :`<div class="row"><span>모양</span><span class="v"><select><option ${it.tpl==='rect'?'selected':''}>사각</option><option ${it.tpl==='circle'?'selected':''}>원</option><option>둥근 사각</option></select></span></div>
+        <div class="row"><span>크기 (mm)</span><span class="v"><input type="number" value="${it.w}"> × <input type="number" value="${it.h}"></span></div>
+        <div class="row"><span>인쇄소 규격</span><span class="v"><select><option>직접</option><option selected>${P.kind==='spin'?'상부 받침대 70×70~99×99':'60×60'}</option></select></span></div>`}
+      ${it.noart?`<div class="hint">이 판은 인쇄 없이 재단만 해요.</div>`:`<div class="grp" style="margin-top:14px"><h3>판에 넣을 그림</h3>
+        <div class="drop" style="padding:14px"><b>이 판용 그림 올리기</b>없으면 단색으로 채워요</div>
+        ${it.cavity?'<div class="hint">테두리판은 가운데가 뚫려요. 뚫리는 영역 폭을 4단계에서 정해요.</div>':''}
+        ${P.kind==='shaker'&&it.n==='앞판'?'<div class="hint">앞판 가운데 창 영역은 화이트를 안 깔아 속이 보여요 (5단계).</div>':''}
+        ${P.kind==='diorama'?'<div class="hint">뒷면은 인쇄소에서 화이트로 제작돼요 — 5단계에서 "뒷면 전체 화이트"로 설정.</div>':''}</div>`}
+    </div>`;
+  }else if(P.step===3){
+    h=`<h2>${isAsm()?curItem().n+' — 칼선':'칼선'}</h2><p class="lead">${KNAME(P.kind)} 기준으로 미리 채워뒀어요. 미리보기 보면서 조절하세요.</p><div class="body">
+      ${P.kind==='sheet'?`<div class="grp"><h3>배치</h3><div class="row"><span>스티커 사이 간격 (mm)</span><span class="v"><input type="number" value="3"></span></div><div class="row"><span>시트 가장자리 여백 (mm)</span><span class="v"><input type="number" value="5"></span></div><div class="row"><span>정렬</span><span class="v"><span class="chip on">자동 채우기</span><span class="chip">직접 배치</span></span></div></div>`:''}
+      ${isSt?`<div class="grp"><h3>스티커 여백</h3><div>${[['1','촘촘'],['2','보통'],['3','넉넉']].map(([v,l])=>`<span class="chip ${P.cut.off==v?'on':''}" onclick="P.cut.off=${v};render()">${l} ${v}mm</span> `).join('')}</div></div>`:''}
+      <div class="grp">
+        <div class="row"><span>여백 (mm)</span><span class="v"><input type="number" value="${P.cut.off}" step="0.5" onchange="P.cut.off=+this.value;render()"></span></div>
+        <div class="row"><span>둥글리기</span><span class="v"><select onchange="P.cut.round=+this.value;render()">${[1,2,3,4,5].map(v=>`<option ${P.cut.round===v?'selected':''}>${v}</option>`).join('')}</select></span></div>
+        <div class="row"><span>틈 좁히기 (mm)</span><span class="v"><input type="number" value="${P.cut.gap}" onchange="P.cut.gap=+this.value;render()"></span></div>
+        <div class="row"><span>작은 구멍 메우기</span><span class="v"><span class="chip ${P.cut.fill?'on':''}" onclick="P.cut.fill=!P.cut.fill;render()">${P.cut.fill?'켬':'끔'}</span></span></div>
+      </div>
+      <div class="grp"><h3>앵커 (벡터 패스 점)</h3>
+        <div class="row"><span>앵커 미리보기</span><span class="v"><span class="chip ${P.anchors.show?'on':''}" onclick="P.anchors.show=!P.anchors.show;render()">${P.anchors.show?'켬':'끔'}</span></span></div>
+        <div class="row"><span>앵커 수 최소화</span><span class="v"><span class="chip ${P.anchors.min?'on':''}" onclick="P.anchors.min=!P.anchors.min;render()">${P.anchors.min?'켬':'끔'}</span><span style="font-size:11.5px;color:var(--ink-soft)">${P.anchors.min?'약 48개':'약 132개'}</span></span></div>
+      </div>
+      <details><summary style="font-size:12.5px;color:var(--ink-soft);cursor:pointer">인식 기준 (투명도·배경색) — 보통은 안 건드려요</summary>
+        <div class="row"><span>배경</span><span class="v"><select><option>투명</option><option>흰색</option></select></span></div>
+        <div class="row"><span>투명도 기준</span><span class="v"><input type="number" value="128"></span></div></details>
+      <div class="hint">${P.kind==='sheet'?'시트는 아이템마다 여백을 따로 줄 수도 있어요 — 오른쪽 아이템을 골라서.':'칼선끼리 붙는 부분이 있으면 미리보기에 표시돼요.'}</div>
+    </div>`;
+  }else if(P.step===4&&isAsm()){
+    const it=curItem();
+    h=`<h2>${it.n} — 부품</h2><p class="lead">판끼리 맞물리는 자리예요. 한쪽을 옮기면 짝이 되는 판도 같이 움직여요.</p><div class="body">
+      ${P.kind==='spin'?(it.k==='A'?`<div class="row"><span>바닥 평평한 폭 (mm)</span><span class="v"><input type="number" value="20"></span></div><div class="row"><span>여백</span><span class="v"><span class="chip on">2mm (권장)</span></span></div><div class="hint">회전 부자재 폭이 15mm라 바닥이 그보다 좁으면 경고해요.</div>`
+        :it.n==='받침대'?`<div class="row"><span>모듈 자리 (원)</span><span class="v"><input type="number" value="15"> mm</span></div><div class="row"><span>위치</span><span class="v"><span class="chip on">가운데</span><span class="chip">끌어서</span></span></div>`:`<div class="hint">회전 모듈은 받침대의 모듈 자리와 같은 크기예요. 받침대에서 바꾸면 따라와요.</div>`):''}
+      ${P.kind==='diorama'?(it.k==='A'?`<div class="row"><span>촉 너비 (mm)</span><span class="v"><input type="number" value="12"></span></div><div class="hint">촉 크기는 바닥판 홈과 같은 값이에요.</div>`
+        :`<div class="row"><span>슬롯 (가이드에서 읽음)</span><span class="v"><span class="chip on">${it.n==='바닥판'?'홈 4':'슬롯 2'}</span></span></div><div class="row"><span>슬롯 여유 (mm)</span><span class="v"><input type="number" value="0.1" step="0.05"></span></div>`):''}
+      ${P.kind==='shaker'?(it.k==='A'?`<div class="row"><span>파츠 두께</span><span class="v"><span class="chip on">1.5T</span></span></div><div class="row"><span>테두리판 안쪽에 들어가는지</span><span class="v"><span class="chip on">✓ 3개 모두</span></span></div>`
+        :`<div class="row"><span>타공 (스냅·리벳)</span><span class="v"><span class="chip on">자동 · 4개</span></span></div><div class="row"><span>고리 구멍 (mm)</span><span class="v"><input type="number" value="3"></span></div>${it.cavity?`<div class="row"><span>테두리 폭 (mm)</span><span class="v"><input type="number" value="8"></span></div>`:''}<div class="hint">세 판의 타공은 항상 같은 자리예요.</div>`):''}
+      ${P.kind==='noodle'?(it.k==='A'?`<div class="row"><span>촉 너비 (mm)</span><span class="v"><input type="number" value="15"></span></div>`:`<div class="row"><span>촉 슬롯</span><span class="v"><span class="chip on">가이드에서 읽음</span></span></div>`):''}
+    </div>`;
+  }else if(P.step===4){
+    const k=P.kind;
+    h=`<h2>${({plain:'집게·자석 도형',ring_hole:'타공',ring_tab:'고리',stand:'촉과 받침',korotto:'바닥'})[k]}</h2><p class="lead">${k==='plain'?'집게나 자석이 붙을 자리를 별도 칼선으로 얹어요.':'미리보기에서 직접 끌어서 옮길 수 있어요.'}</p><div class="body">
+      ${k==='ring_hole'?`<div class="row"><span>구멍 지름 (mm)</span><span class="v"><input type="number" value="3"></span></div><div class="row"><span>위치</span><span class="v"><span class="chip on">자동</span><span class="chip">직접</span></span></div>`:''}
+      ${k==='ring_tab'?`<div class="row"><span>고리 구멍 (mm)</span><span class="v"><input type="number" value="3"></span></div><div class="row"><span>고리 벽 두께 (mm)</span><span class="v"><input type="number" value="2"></span></div>`:''}
+      ${k==='stand'?`<div class="row"><span>촉 너비 (mm)</span><span class="v"><input type="number" value="15"></span></div><div class="row"><span>촉 높이 (mm)</span><span class="v"><input type="number" value="8"></span></div>
+        ${P.base!=='none'?`<div class="row"><span>받침 슬롯 앞뒤 (mm)</span><span class="v"><input type="number" value="0"></span></div><div class="row"><span>받침 두께 (mm)</span><span class="v"><input type="number" value="3"></span></div>`:'<div class="hint">받침 없음으로 골랐어요. 촉만 만들어요.</div>'}`:''}
+      ${k==='korotto'?`<div class="row"><span>바닥 평평한 폭 (mm)</span><span class="v"><input type="number" value="20"></span></div>${P.koro==='roly'?`<div class="row"><span>흔들림 세기</span><span class="v"><input type="number" value="5"></span></div><div class="hint">무게중심을 재서 반지름을 잡아요. 넘어질 것 같으면 경고가 떠요.</div>`:''}`:''}
+      <div class="grp" style="margin-top:${k==='plain'?0:14}px"><h3>${k==='plain'?'도형':'도형 덧붙이기'}</h3>
+        ${k!=='plain'?`<div class="row"><span>도형 칼선 얹기</span><span class="v"><span class="chip ${P.parts.shape?'on':''}" onclick="P.parts.shape=!P.parts.shape;render()">${P.parts.shape?'켬':'끔'}</span></span></div>`:''}
+        ${(k==='plain'||P.parts.shape)?`
+        <div class="row"><span>프리셋</span><span class="v"><select onchange="shapePreset(this.value)">
+          ${[['clip_normal','집게 · 일반형 (⌀32)'],['clip_wide','집게 · 와이드 (55×32)'],['clip_magnet','자석 (⌀40)'],['custom','직접 설정']].map(([v,l])=>`<option value="${v}" ${P.shape.preset===v?'selected':''}>${l}</option>`).join('')}</select></span></div>
+        <div class="row"><span>모양</span><span class="v"><select onchange="P.shape.kind=this.value;P.shape.preset='custom';render()">${[['circle','원'],['rect','사각'],['rrect','둥근 사각']].map(([v,l])=>`<option value="${v}" ${P.shape.kind===v?'selected':''}>${l}</option>`).join('')}</select></span></div>
+        <div class="row"><span>크기 (mm)</span><span class="v"><input type="number" value="${P.shape.w}" onchange="P.shape.w=+this.value;P.shape.preset='custom';render()"> × <input type="number" value="${P.shape.h}" onchange="P.shape.h=+this.value;P.shape.preset='custom';render()"></span></div>
+        ${P.shape.kind==='rrect'?`<div class="row"><span>모서리 (mm)</span><span class="v"><input type="number" value="${P.shape.r}" onchange="P.shape.r=+this.value;render()"></span></div>`:''}
+        <div class="row"><span>위치</span><span class="v"><span class="chip on">가운데</span><span class="chip">끌어서 옮기기</span></span></div>
+        <div class="row"><span>색</span><span class="v"><input type="color" value="#5aa0ff"></span></div>`:''}
+      </div>
+    </div>`;
+  }else if(P.step===5){
+    h=`<h2>${isSt?'배경(대지)':'화이트 레이어'}</h2><p class="lead">${isSt?'스티커 뒤에 깔리는 인쇄 배경이에요.':'투명 아크릴 뒤에 흰 잉크를 깔아 색이 살아나게 해요.'}</p><div class="body">
+      <div class="row"><span>${isSt?'배경 인쇄':'화이트 추가'}</span><span class="v"><span class="chip ${P.white.on?'on':''}" onclick="P.white.on=!P.white.on;render()">${P.white.on?'켬':'끔'}</span></span></div>
+      ${P.white.on?`
+      ${isSt?`<div class="grp" style="margin-top:10px"><h3>${P.kind==='sheet'?'시트 배경':'배경'}</h3><div class="choices">
+        ${choice(P.white.range!=='file',"P.white.range='cut';P.white.src='auto';render()",'단색',P.kind==='sheet'?'시트 전체':'대지 전체')}
+        ${choice(P.white.range==='file',"P.white.range='file';P.white.src='custom';render()",'배경 파일',P.kind==='sheet'?'시트 크기 그대로 인쇄':'파일 크기가 대지 크기 · 자르지 않아요')}
+      </div>
+      ${P.white.range==='file'?`<div class="row"><span>🎨 ${P.kind==='sheet'?'시트배경.png · 시트보다 작으면 늘리지 않고 경고':'배경.png 100×120mm → 대지 크기가 돼요'}</span><span class="chip">바꾸기</span></div><div class="hint">인쇄물은 이 배경이라 PDF 디자인 페이지 대신 배경 페이지가 나가요.</div>`:`<div class="row"><span>배경 색</span><span class="v"><input type="color" value="#ffffff"></span></div>`}
+      <div class="hint">배경 위에 스티커를 반칼로 얹고, ${P.kind==='sheet'?'시트':'대지'} 외곽만 완칼이에요. 투명 스티커로 여백을 비우고 싶으면 배경을 끄세요.</div></div>`
+      :`<div class="grp" style="margin-top:10px"><h3>모양</h3><div class="choices">
+        ${choice(P.white.src==='auto',"P.white.src='auto';render()",'그림 그대로','자동')}
+        ${choice(P.white.src==='custom',"P.white.src='custom';render()",'직접 만든 파일','부분 화이트·홀로그램 연출')}
+      </div>${P.white.src==='custom'?`<div class="row"><span>🎨 화이트.png · 불투명 62%</span><span class="chip">바꾸기</span></div>`:''}</div>
+      <div class="row"><span>여백 (mm)</span><span class="v"><input type="number" value="${P.white.off}" step="0.1" onchange="P.white.off=+this.value;render()"></span></div>`}
+      <div class="row"><span>미리보기에 표시</span><span class="v"><span class="chip ${P.whitePrev?'on':''}" onclick="P.whitePrev=!P.whitePrev;render()">${P.whitePrev?'켬':'끔'}</span><span style="font-size:11.5px;color:var(--ink-soft)">실제 내보낼 모양 그대로</span></span></div>
+      ${isSt?``:`<div class="row"><span>형식</span><span class="v"><select onchange="P.white.fmt=this.value"><option value="vector">벡터 패스</option><option value="raster">이미지</option></select></span></div>`}
+      ${isAsm()?`<div class="grp" style="margin-top:12px"><h3>판별 규칙</h3>${curItems().map(it=>`<div class="row"><span>${it.n}</span><span style="font-size:11.5px;color:var(--ink-soft)">${it.noart?'화이트 없음':P.kind==='diorama'&&it.k==='B'?'뒷면 전체 화이트':P.kind==='shaker'&&it.n==='앞판'?'창 영역 제외':P.kind==='spin'&&it.k==='A'?'양면 · 그림 그대로':'그림 그대로'}</span></div>`).join('')}</div>`:''}
+      <div class="hint">그림 대비 이탈량: 0.12mm — 인쇄소 허용치 안이에요.</div>`:''}
+    </div>`;
+  }else if(P.step===6){
+    h=`<h2>저장</h2><p class="lead">인쇄소에 보낼 파일을 만들어요.</p><div class="body">
+      <div class="grp"><h3>대지</h3>
+        <div class="row"><span>대지 크기 고정</span><span class="v"><span class="chip ${P.board.on?'on':''}" onclick="P.board.on=!P.board.on;render()">${P.board.on?'켬':'끔'}</span></span></div>
+        ${P.board.on?`<div class="row"><span>크기 (mm)</span><span class="v"><input type="number" value="${P.board.w}"> × <input type="number" value="${P.board.h}"></span></div>`:''}
+        ${P.kind==='stand'&&P.base!=='none'?`<div class="row"><span>본체·받침 대지 나누기</span><span class="v"><span class="chip ${P.board.split?'on':''}" onclick="P.board.split=!P.board.split;render()">${P.board.split?'켬':'끔'}</span></span></div>`:''}
+        ${isAsm()?`<div class="row"><span>판마다 대지 나누기</span><span class="v"><span class="chip on">켬</span></span></div><div class="row"><span>두께가 다른 판</span><span style="font-size:11.5px;color:var(--ink-soft)">${P.kind==='shaker'?'2T 3장 + 1.5T 파츠 → 파일 2개':P.kind==='spin'?'3T 2장 + 5T 모듈 → 파일 2개':'한 파일'}</span></div>`:''}
+        ${P.kind==='sheet'?`<div class="row"><span>아이템 배치</span><span class="v"><span class="chip on">자동 채우기</span><span class="chip">직접</span></span></div>`:''}
+      </div>
+      <div class="grp"><h3>형식</h3><div class="choices">
+        <button class="choice"><b>PDF</b></button>
+        <button class="choice"><b>PSD</b></button>
+        <button class="choice"><b>SVG</b></button>
+        <button class="choice"><b>PNG 묶음</b></button>
+      </div></div>
+
+    </div>`;
+  }
+  const d=stepDefs();const isLast=P.step===6;
+  h+=`<div class="nav"><button class="btn" onclick="prev()" ${P.step===1?'disabled':''}>이전</button>
+      <button class="btn primary" onclick="${isLast?'alert(\'목업이라 저장은 안 돼요 🍓\')':'next()'}" ${!isLast&&!doneOf[P.step]()?'disabled':''}>${isLast?'PDF로 저장':'다음'}</button></div>`;
+  $('panel').innerHTML=h;
+}
+function set(k,v){
+  if(k==='product'&&P.product!==v){P.kind=null;P.img=false;P.base=null;}
+  if(k==='kind'){P.base=v==='stand'?(P.base||'extract'):null;P.item=0;}
+  P[k]=v;
+  if(k==='product')P.step=2;
+  render();
+}
+
+// ===== 미리보기 (가짜) =====
+function renderStage(){
+  const svg=$('svg');const isSt=P.product==='sticker';const k=P.kind;
+  if(!P.img){svg.innerHTML='';$('tools').style.display='none';P.view='draft';$('stageTitle').textContent=P.kind?'이미지를 올리면 미리보기가 떠요':'굿즈를 고르면 미리보기가 여기 떠요';$('items').innerHTML='';$('cap').style.display='none';return;}
+  const off=P.cut.off*2.2;const showCut=P.step>=3;const showWhite=P.step>=5&&P.white.on&&P.whitePrev;
+  $('vDraft').classList.toggle('on',P.view==='draft');$('vFinal').classList.toggle('on',P.view==='final');
+  if(P.view==='final'){renderFinal(svg,items_(k),off);return;}
+  const blob=(cx,cy,s,fill)=>`<path transform="translate(${cx},${cy}) scale(${s})" d="M0,-70 C40,-70 55,-40 50,-10 C60,20 40,60 0,60 C-40,60 -60,20 -50,-10 C-55,-40 -40,-70 0,-70Z" fill="${fill}"/>`;
+  const cutOf=(cx,cy,s)=>`<path transform="translate(${cx},${cy}) scale(${s})" d="M0,-70 C40,-70 55,-40 50,-10 C60,20 40,60 0,60 C-40,60 -60,20 -50,-10 C-55,-40 -40,-70 0,-70Z" fill="none" stroke="var(--cut)" stroke-width="${2/s}" stroke-dasharray="${6/s} ${4/s}" style="paint-order:stroke" vector-effect="non-scaling-stroke" transform-origin="0 0" />`;
+  let g='<defs><pattern id="bgpat" width="14" height="14" patternUnits="userSpaceOnUse"><rect width="14" height="14" fill="#fff3c4"/><circle cx="7" cy="7" r="3" fill="#ffd166"/></pattern></defs>';
+  if(isAsm()){renderAsm(svg);return;}
+  const items=items_(k);
+  if(isSt){const sheetOn=P.step>=5&&P.white.on&&P.whitePrev;const B=k==='sheet'?[60,30,480,360]:[170,60,260,290];
+    g+=`<rect x="${B[0]}" y="${B[1]}" width="${B[2]}" height="${B[3]}" rx="6" fill="${sheetOn?(P.white.range==='file'?'url(#bgpat)':'#fff'):'none'}" stroke="${P.step>=3?'var(--cut)':'#ccc'}" stroke-width="${P.step>=3?1.6:1}" ${P.step>=3?'':'stroke-dasharray="4 3"'}/>`;
+    if(P.step>=3)g+=`<text x="${B[0]+6}" y="${B[1]+16}" font-size="10" fill="var(--cut)">완칼 (${k==='sheet'?'시트':'대지'} 외곽)</text>`;}
+  else if(P.step>=6&&P.board.on)g+=`<rect x="60" y="30" width="480" height="360" fill="none" stroke="#ccc" stroke-dasharray="4 3"/>`;
+  items.forEach(([cx,cy,s],i)=>{
+    const sel=i===P.item;
+    if(sel&&P.rot)g+=`<g transform="rotate(${P.rot} ${cx} ${cy})">`;
+    if(showWhite&&!isSt){const ws=s*(1+P.white.off*2.2/90);
+      g+=`<path transform="translate(${cx},${cy}) scale(${ws})" d="M0,-70 C40,-70 55,-40 50,-10 C60,20 40,60 0,60 C-40,60 -60,20 -50,-10 C-55,-40 -40,-70 0,-70Z" fill="${isSt?(P.white.range==='file'?'url(#bgpat)':'#fff'):'#dfe9ff'}" stroke="${isSt?'#e6e6e6':'#9fb7ff'}" stroke-width="1"/>`;}
+    if(P.white.src==='custom'&&showWhite&&!isSt)g+=`<circle cx="${cx}" cy="${cy-15}" r="${28*s}" fill="#fff"/>`;
+    g+=blob(cx,cy,s,sel?'#ffb3c9':'#ffd0dd');
+    g+=`<circle cx="${cx-12*s}" cy="${cy-20*s}" r="${5*s}" fill="#463941"/><circle cx="${cx+12*s}" cy="${cy-20*s}" r="${5*s}" fill="#463941"/>`;
+    if(showCut)g+=`<path transform="translate(${cx},${cy}) scale(${s*(1+off/90)})" d="M0,-70 C40,-70 55,-40 50,-10 C60,20 40,60 0,60 C-40,60 -60,20 -50,-10 C-55,-40 -40,-70 0,-70Z" fill="none" stroke="var(--cut)" stroke-width="1.6" ${P.cut.round>=4?'stroke-linejoin="round"':''}/>`;
+    if(P.step>=4&&!isSt){
+      if(k==='ring_hole')g+=`<circle cx="${cx}" cy="${cy-78*s}" r="${6*s}" fill="#fff" stroke="var(--cut)" stroke-width="1.6"/>`;
+      if(k==='ring_tab')g+=`<circle cx="${cx}" cy="${cy-88*s}" r="${11*s}" fill="none" stroke="var(--cut)" stroke-width="1.6"/><circle cx="${cx}" cy="${cy-88*s}" r="${5*s}" fill="#fff" stroke="var(--cut)" stroke-width="1.6"/>`;
+      if(k==='stand'){g+=`<rect x="${cx-14*s}" y="${cy+58*s}" width="${28*s}" height="${16*s}" fill="none" stroke="var(--cut)" stroke-width="1.6"/>`;
+        if(P.base!=='none')g+=`<g transform="translate(${cx},${cy+120*s})"><ellipse rx="${70*s}" ry="${18*s}" fill="#ffd0dd" stroke="var(--cut)" stroke-width="1.6"/><rect x="${-15*s}" y="${-4*s}" width="${30*s}" height="${8*s}" fill="#fff" stroke="var(--cut)" stroke-width="1.2"/></g>`;}
+      if(k==='korotto'){g+=`<line x1="${cx-30*s}" y1="${cy+60*s}" x2="${cx+30*s}" y2="${cy+60*s}" stroke="var(--cut)" stroke-width="3"/>`;
+        if(P.koro==='roly')g+=`<path d="M${cx-30*s},${cy+60*s} Q${cx},${cy+72*s} ${cx+30*s},${cy+60*s}" fill="none" stroke="var(--cut)" stroke-width="2"/><circle cx="${cx}" cy="${cy-5*s}" r="4" fill="#ec008c"/><text x="${cx+8}" y="${cy-2}" font-size="11" fill="#ec008c">무게중심</text>`;}
+      if(k==='plain'||P.parts.shape){const sw=P.shape.w*1.1*s,sh=P.shape.h*1.1*s,sx=cx-sw/2,sy=cy+10*s-sh/2;
+        g+=P.shape.kind==='circle'?`<ellipse cx="${cx}" cy="${cy+10*s}" rx="${sw/2}" ry="${sh/2}" fill="none" stroke="#5aa0ff" stroke-width="1.6"/>`
+          :`<rect x="${sx}" y="${sy}" width="${sw}" height="${sh}" rx="${P.shape.kind==='rrect'?P.shape.r*1.1*s:0}" fill="none" stroke="#5aa0ff" stroke-width="1.6"/>`;}
+    }
+    if(showCut&&P.anchors.show){const n=P.anchors.min?12:34;for(let a=0;a<n;a++){const t=a/n*Math.PI*2;const rx=(55+off*.5)*s,ry=(68+off*.5)*s;g+=`<rect x="${cx+Math.cos(t)*rx-2}" y="${cy-5*s+Math.sin(t)*ry-2}" width="4" height="4" fill="#fff" stroke="var(--cut)" stroke-width="1"/>`;}}
+    if(sel){g+=`<rect x="${cx-70*s}" y="${cy-85*s}" width="${140*s}" height="${170*s}" fill="none" stroke="var(--accent)" stroke-width="1" stroke-dasharray="3 3"/>`;
+      g+=`<line x1="${cx}" y1="${cy-85*s}" x2="${cx}" y2="${cy-105*s}" stroke="var(--accent)"/><circle cx="${cx}" cy="${cy-105*s}" r="6" fill="#fff" stroke="var(--accent)" stroke-width="1.5"/>`;
+      if(P.rot)g+=`<text x="${cx+10}" y="${cy-100*s}" font-size="11" fill="var(--accent)">${P.rot}°</text>`;}
+    if(sel&&P.rot)g+=`</g>`;
+  });
+  svg.innerHTML=g;
+  const T={1:'',3:`${isSt?'반칼 ':''}칼선 여백 ${P.cut.off}mm · 둥글리기 ${P.cut.round}${P.anchors.show?` · 앵커 ${P.anchors.min?'48':'132'}개`:''}`,2:`${KNAME(k)} · 이미지 올림`,4:'부품 — 끌어서 옮길 수 있어요',5:`${isSt?'대지':'화이트'} ${P.white.on?'켬':'끔'}${P.white.src==='custom'?' · 직접 만든 파일':''}`,6:`저장 미리보기${P.board.on?` · 대지 ${P.board.w}×${P.board.h}mm`:''}`};
+  $('stageTitle').textContent=T[P.step]||'';
+  $('unitChip').textContent=`mm · ${P.dpi}dpi`;$('tools').style.display='inline-flex';
+  // 아이템 목록
+  const list=k==='sheet'?['스티커 1','스티커 2','스티커 3','스티커 4','스티커 5','스티커 6']:['캐릭터'];
+  $('items').innerHTML=list.map((n,i)=>`<span class="item ${i===P.item?'on':''}" onclick="P.item=${i};render()"><i style="background:${i===P.item?'#ffb3c9':'#ffd0dd'}"></i>${n}</span>`).join('')+`<span class="item"><span class="add">＋ 이미지 추가</span></span>`;
+  const cap=$('cap');
+  const capT={2:['아이템','한 파일에 여러 개가 있으면 각각 아이템이 돼요. 골라서 끌면 옮겨지고, 위쪽 동그란 손잡이를 돌리면 회전해요.'],3:['칼선','분홍 점선이 잘리는 선이에요. 붙어버린 곳은 빨갛게 표시돼요.'],4:['부품',P.kind==='plain'?'파란 선이 집게·자석 자리예요. 프리셋 고르거나 크기를 직접 정해요.':'타공·고리·촉·받침은 여기서만 손대요. 도형(집게·자석)은 어느 종류에나 얹을 수 있어요.'],5:[isSt?'배경':'화이트',isSt?`${k==='sheet'?'시트':'대지'} 전체에 배경이 깔리고 스티커는 반칼이에요.`:'연한 파란 면이 흰 잉크 자리예요. 직접 만든 파일이면 그 모양대로.'],6:['저장','대지 크기를 고정하면 인쇄소 규격 그대로 나가요.']}[P.step];
+  if(capT){cap.style.display='block';cap.innerHTML=`<b>${capT[0]}</b>${capT[1]}`;}else cap.style.display='none';
+}
+const ACCENTS=[['#ff3d8a','핑크'],['#3b82f6','블루'],['#8b5cf6','퍼플'],['#10b981','그린'],['#f59e0b','오렌지']];
+let accent=ACCENTS[0][0];
+function paintDots(){$('dots').innerHTML=ACCENTS.map(([c,n])=>`<span class="dot ${c===accent?'on':''}" title="${n}" style="background:${c}" onclick="setAccent('${c}')"></span>`).join('');}
+function setAccent(c){accent=c;document.documentElement.style.setProperty('--accent',c);document.documentElement.style.setProperty('--accent-soft',c+'22');paintDots();}
+function theme(t){document.body.classList.toggle('dark',t==='dark');$('thL').classList.toggle('on',t!=='dark');$('thD').classList.toggle('on',t==='dark');}
+const SHAPE_PRESETS={clip_normal:{kind:'circle',w:32,h:32,r:0},clip_wide:{kind:'rrect',w:55,h:32,r:6},clip_magnet:{kind:'circle',w:40,h:40,r:0}};
+function shapePreset(v){P.shape.preset=v;if(SHAPE_PRESETS[v])Object.assign(P.shape,SHAPE_PRESETS[v]);render();}
+function toggleNews(){$('news').classList.toggle('open');}
+const LANGS=[['ko','한국어'],['en','EN'],['ja','日本語'],['zh','中文']];let lang='ko';
+function paintLang(){$('langSeg').innerHTML=LANGS.map(([c,n])=>`<button class="${c===lang?'on':''}" onclick="setLang('${c}')">${n}</button>`).join('');}
+function setLang(c){lang=c;paintLang();}
+paintLang();paintDots();const items_=k=>k==='sheet'?[[150,150,.9],[330,140,.8],[470,170,.7],[170,320,.7],[340,320,.85],[480,330,.6]]:[[300,190,1.4]];
+function renderFinal(svg,items,off){ // 완성 미리보기: 투명 아크릴 + 화이트 + 그림, 칼선 없음
+  const k=P.kind;const D='M0,-70 C40,-70 55,-40 50,-10 C60,20 40,60 0,60 C-40,60 -60,20 -50,-10 C-55,-40 -40,-70 0,-70Z';
+  const path=(cx,cy,s,attrs)=>`<path transform="translate(${cx},${cy}) scale(${s})" d="${D}" ${attrs}/>`;
+  let g=`<defs><linearGradient id="gl" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".9"/><stop offset=".5" stop-color="#dfe9f5" stop-opacity=".25"/><stop offset="1" stop-color="#fff" stop-opacity=".7"/></linearGradient><filter id="sh"><feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#000" flood-opacity=".18"/></filter></defs>`;
+  const whiteOn=P.white.on;const isSt=P.product==='sticker';
+  if(isSt){ // 스티커: 대지(종이/투명) 위에 그림, 칼선 여백만큼 대지가 보임
+    g+='<defs><pattern id="bgpat2" width="14" height="14" patternUnits="userSpaceOnUse"><rect width="14" height="14" fill="#fff3c4"/><circle cx="7" cy="7" r="3" fill="#ffd166"/></pattern></defs>';
+    {const B=k==='sheet'?[60,30,480,360]:[170,60,260,290];g+=`<rect x="${B[0]}" y="${B[1]}" width="${B[2]}" height="${B[3]}" rx="6" fill="#000" opacity=".08" filter="url(#sh)"/><rect x="${B[0]}" y="${B[1]}" width="${B[2]}" height="${B[3]}" rx="6" fill="${whiteOn?(P.white.range==='file'?'url(#bgpat2)':'#fff'):'rgba(255,255,255,.3)'}" stroke="#e2e2e6"/>`;}
+    items.forEach(([cx,cy,s])=>{const cs=s*(1+off/90);const r='sheet';
+      g+=(r==='sheet'?path(cx,cy,cs,'fill="none" stroke="#d9d9de" stroke-width=".8" stroke-dasharray="2 2"'):path(cx,cy+2,cs,'fill="#000" opacity=".10" filter="url(#sh)"')+path(cx,cy,cs,`fill="rgba(255,255,255,.3)" stroke="#e2e2e6" stroke-width="1"`)
+        +(whiteOn?path(cx,cy,cs,`fill="${r==='file'?'url(#bgpat2)':'#fff'}"`):''))
+        +path(cx,cy,s,`fill="${whiteOn?'#ffb3c9':'rgba(255,179,201,.6)'}"`)+`<circle cx="${cx-12*s}" cy="${cy-20*s}" r="${5*s}" fill="#463941"/><circle cx="${cx+12*s}" cy="${cy-20*s}" r="${5*s}" fill="#463941"/>`;});
+    svg.innerHTML=g;$('stageTitle').textContent=`완성 미리보기 · ${k==='sheet'?'시트':'낱장'} · ${!whiteOn?'배경 없음 (투명)':P.white.range==='file'?'배경 파일':'단색 배경'}`;$('tools').style.display='inline-flex';
+    const list=k==='sheet'?['스티커 1','스티커 2','스티커 3','스티커 4','스티커 5','스티커 6']:['캐릭터'];
+    $('items').innerHTML=list.map((n,i)=>`<span class="item ${i===P.item?'on':''}" onclick="P.item=${i};render()"><i style="background:${i===P.item?'#ffb3c9':'#ffd0dd'}"></i>${n}</span>`).join('');
+    const cap=$('cap');cap.style.display='block';cap.innerHTML=`<b>완성 미리보기</b>${k==='sheet'?'시트':'대지'} 전체가 배경이고 스티커는 반칼 자국만 남아요. 배경을 끄면 투명 스티커처럼 비쳐요.`;return;}
+  items.forEach(([cx,cy,s])=>{
+    const cs=s*(1+off/90);
+    // 아크릴 판 (그림자 + 유리질)
+    g+=path(cx,cy+3,cs,'fill="#000" opacity=".12" filter="url(#sh)"')+path(cx,cy,cs,'fill="url(#gl)" stroke="#9fb3c8" stroke-width="2"');
+    if(whiteOn)g+=path(cx,cy,s*(1+P.white.off*2.2/90),'fill="#fff"');
+    if(P.white.src==='custom'&&whiteOn)g+=`<circle cx="${cx}" cy="${cy-15}" r="${28*s}" fill="#fff"/>`;
+    g+=path(cx,cy,s,`fill="${whiteOn?'#ffb3c9':'rgba(255,179,201,.55)'}"`)+`<circle cx="${cx-12*s}" cy="${cy-20*s}" r="${5*s}" fill="#463941"/><circle cx="${cx+12*s}" cy="${cy-20*s}" r="${5*s}" fill="#463941"/>`;
+    // 유리 하이라이트
+    g+=path(cx,cy,cs,'fill="none" stroke="#fff" stroke-width="2" stroke-opacity=".6" stroke-dasharray="40 120"');
+    if(P.step>=4){
+      if(k==='ring_hole')g+=`<circle cx="${cx}" cy="${cy-78*s}" r="${6*s}" fill="#f6f6f8" stroke="#b9c8da"/><path d="M${cx},${cy-78*s} a${9*s},${9*s} 0 1,1 0,-${18*s}" fill="none" stroke="#c9a227" stroke-width="2.5"/>`;
+      if(k==='ring_tab')g+=`<circle cx="${cx}" cy="${cy-88*s}" r="${11*s}" fill="url(#gl)" stroke="#b9c8da"/><circle cx="${cx}" cy="${cy-88*s}" r="${5*s}" fill="#f6f6f8" stroke="#b9c8da"/>`;
+      if(k==='stand'){g+=`<rect x="${cx-14*s}" y="${cy+58*s}" width="${28*s}" height="${16*s}" fill="url(#gl)" stroke="#b9c8da"/>`;if(P.base!=='none')g+=`<g transform="translate(${cx},${cy+120*s})"><ellipse rx="${70*s}" ry="${18*s}" fill="url(#gl)" stroke="#b9c8da"/><ellipse rx="${70*s}" ry="${18*s}" fill="#ffd0dd" opacity=".5"/></g>`;}
+      if(k==='korotto')g+=`<rect x="${cx-30*s}" y="${cy+58*s}" width="${60*s}" height="6" fill="#dfe9f5" stroke="#b9c8da"/>`;
+      if(k==='plain'||P.parts.shape){const sw=P.shape.w*1.1*s,sh=P.shape.h*1.1*s;g+=P.shape.kind==='circle'?`<ellipse cx="${cx}" cy="${cy+10*s}" rx="${sw/2}" ry="${sh/2}" fill="#d9d9de" stroke="#9a9aa3"/>`:`<rect x="${cx-sw/2}" y="${cy+10*s-sh/2}" width="${sw}" height="${sh}" rx="${P.shape.kind==='rrect'?P.shape.r*1.1*s:0}" fill="#d9d9de" stroke="#9a9aa3"/>`;}
+    }
+  });
+  svg.innerHTML=g;
+  $('stageTitle').textContent=`완성 미리보기 · 3T 투명 아크릴${whiteOn?' · 화이트 있음':' · 화이트 없음 (색이 비쳐요)'}`;$('unitChip').textContent=`mm · ${P.dpi}dpi`;$('tools').style.display='inline-flex';
+  const list=k==='sheet'?['스티커 1','스티커 2','스티커 3','스티커 4','스티커 5','스티커 6']:['캐릭터'];
+  $('items').innerHTML=list.map((n,i)=>`<span class="item ${i===P.item?'on':''}" onclick="P.item=${i};render()"><i style="background:${i===P.item?'#ffb3c9':'#ffd0dd'}"></i>${n}</span>`).join('');
+  const cap=$('cap');cap.style.display='block';cap.innerHTML=`<b>완성 미리보기</b>투명 아크릴 위에 화이트와 그림을 얹은 모습이에요. 화이트를 끄면 그림이 비쳐 보여요. 칼선·앵커는 도안 보기에서.`;
+}
+function renderAsm(svg){
+  const its=curItems();const sel=P.item;const showCut=P.step>=3,showParts=P.step>=4,showWhite=P.step>=5&&P.white.on&&P.whitePrev;
+  const blob=(cx,cy,s,fill)=>`<path transform="translate(${cx},${cy}) scale(${s})" d="M0,-70 C40,-70 55,-40 50,-10 C60,20 40,60 0,60 C-40,60 -60,20 -50,-10 C-55,-40 -40,-70 0,-70Z" fill="${fill}"/>`;
+  const cut=(cx,cy,s)=>`<path transform="translate(${cx},${cy}) scale(${s*1.06})" d="M0,-70 C40,-70 55,-40 50,-10 C60,20 40,60 0,60 C-40,60 -60,20 -50,-10 C-55,-40 -40,-70 0,-70Z" fill="none" stroke="var(--cut)" stroke-width="1.6"/>`;
+  const frame=(x,y,w,h,i)=>i===sel?`<rect x="${x-8}" y="${y-8}" width="${w+16}" height="${h+16}" fill="none" stroke="var(--accent)" stroke-dasharray="3 3"/>`:'';
+  const label=(x,y,t)=>`<text x="${x}" y="${y}" font-size="11" fill="var(--ink-soft)">${t}</text>`;
+  let g='';const W='#dfe9ff';
+  if(P.kind==='spin'){
+    const bx=150,by=180;g+=frame(bx-75,by-95,150,175,0)+(showWhite?blob(bx,by,1.3,W):'')+blob(bx,by,1.2,sel===0?'#ffb3c9':'#ffd0dd')+(showCut?cut(bx,by,1.2):'')+(showCut?`<line x1="${bx-30}" y1="${by+72}" x2="${bx+30}" y2="${by+72}" stroke="var(--cut)" stroke-width="3"/>`:'')+label(bx-20,by+110,'본체 (그림)');
+    const rx=330,ry=120;g+=frame(rx,ry,150,150,1)+`<rect x="${rx}" y="${ry}" width="150" height="150" rx="10" fill="${showWhite?W:'#f3f3f6'}" stroke="var(--cut)" stroke-width="${showCut?1.6:0}"/>`+blob(rx+75,ry+80,.7,'#ffd0dd')+(showParts?`<circle cx="${rx+75}" cy="${ry+75}" r="16" fill="none" stroke="var(--cut)" stroke-width="1.6"/>`:'')+label(rx,ry+170,'받침대 (판 70×70)');
+    const mx=545,my=195;g+=frame(mx-45,my-45,90,90,2)+`<circle cx="${mx}" cy="${my}" r="45" fill="#f3f3f6" stroke="var(--cut)" stroke-width="${showCut?1.6:0}"/>`+(showParts?`<circle cx="${mx}" cy="${my}" r="16" fill="#fff" stroke="var(--cut)" stroke-width="1.6"/>`:'')+label(mx-40,my+65,'회전 모듈 (원 70)');
+  }
+  if(P.kind==='diorama'){
+    const pan=(x,y,w,h,i,t,slots)=>{g+=frame(x,y,w,h,i)+`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${showWhite?W:'#f3f3f6'}" stroke="var(--cut)" stroke-width="${showCut?1.6:0}"/>`+blob(x+w/2,y+h/2,Math.min(w,h)/150,'#ffd0dd')+(showParts?slots:'')+label(x,y+h+14,t);};
+    pan(40,60,120,170,0,'좌판',`<rect x="60" y="222" width="14" height="8" fill="#fff" stroke="var(--cut)"/><rect x="126" y="222" width="14" height="8" fill="#fff" stroke="var(--cut)"/>`);
+    pan(190,60,120,170,1,'우판',`<rect x="210" y="222" width="14" height="8" fill="#fff" stroke="var(--cut)"/><rect x="276" y="222" width="14" height="8" fill="#fff" stroke="var(--cut)"/>`);
+    pan(340,90,220,140,2,'바닥판',['355','421','487','520'].map(x=>`<rect x="${x}" y="150" width="14" height="8" fill="#fff" stroke="var(--cut)"/>`).join(''));
+    const cx=450,cy=320;g+=frame(cx-55,cy-70,110,130,3)+blob(cx,cy-10,.8,sel===3?'#ffb3c9':'#ffd0dd')+(showCut?cut(cx,cy-10,.8):'')+(showParts?`<rect x="${cx-7}" y="${cy+40}" width="14" height="12" fill="none" stroke="var(--cut)" stroke-width="1.6"/>`:'')+label(cx-40,cy+78,'캐릭터 파츠 (그림)');
+  }
+  if(P.kind==='shaker'){
+    const plate=(x,y,i,t,extra)=>{g+=frame(x,y,140,140,i)+`<rect x="${x}" y="${y}" width="140" height="140" rx="40" fill="${showWhite?(i===0?'#f3f3f6':W):'#f3f3f6'}" stroke="var(--cut)" stroke-width="${showCut?1.6:0}"/>`+extra+(showParts?`<circle cx="${x+18}" cy="${y+18}" r="4" fill="#fff" stroke="var(--cut)"/><circle cx="${x+122}" cy="${y+18}" r="4" fill="#fff" stroke="var(--cut)"/><circle cx="${x+18}" cy="${y+122}" r="4" fill="#fff" stroke="var(--cut)"/><circle cx="${x+122}" cy="${y+122}" r="4" fill="#fff" stroke="var(--cut)"/><circle cx="${x+70}" cy="${y-6}" r="6" fill="#fff" stroke="var(--cut)" stroke-width="1.6"/>`:'')+label(x,y+158,t);};
+    plate(30,40,0,'앞판 (창 있음)',`<rect x="60" y="70" width="80" height="80" rx="20" fill="${showWhite?'#fff':'#eaeaef'}" stroke="#ccc" stroke-dasharray="3 2"/>`+blob(100,110,.35,'#ffd0dd'));
+    plate(210,40,1,'테두리판 (가운데 뚫림)',`<rect x="240" y="70" width="80" height="80" rx="20" fill="#fff" stroke="var(--cut)" stroke-width="${showCut?1.6:0}"/>`);
+    plate(390,40,2,'뒷판',blob(460,110,.8,'#ffd0dd'));
+    [[120,300,.45],[220,310,.4],[320,300,.5]].forEach(([x,y,s],j)=>{g+=blob(x,y,s,sel===3?'#ffb3c9':'#ffd0dd')+(showCut?cut(x,y,s):'');});
+    g+=frame(70,250,300,110,3)+label(70,385,'파츠 3개 (그림 · 1.5T)');
+  }
+  if(P.kind==='noodle'){
+    g+=frame(80,80,440,150,0)+`<path d="M80,230 Q80,80 300,80 Q520,80 520,230 Z" fill="${showWhite?W:'#f3f3f6'}" stroke="var(--cut)" stroke-width="${showCut?1.6:0}"/>`+blob(300,170,.6,'#ffd0dd')+(showParts?`<rect x="290" y="88" width="20" height="10" fill="#fff" stroke="var(--cut)"/>`:'')+label(80,250,'덮개판 (가이드)');
+    const cx=300,cy=330;g+=frame(cx-55,cy-60,110,110,1)+blob(cx,cy-5,.65,sel===1?'#ffb3c9':'#ffd0dd')+(showCut?cut(cx,cy-5,.65):'')+(showParts?`<rect x="${cx-10}" y="${cy+36}" width="20" height="10" fill="none" stroke="var(--cut)" stroke-width="1.6"/>`:'')+label(cx-30,cy+70,'캐릭터 (그림)');
+  }
+  svg.innerHTML=g;
+  const cur=curItem();
+  $('stageTitle').textContent=`${ASSEMBLY[P.kind].name} · ${cur.n} 선택`;$('unitChip').textContent=`mm · ${P.dpi}dpi`;$('tools').style.display='inline-flex';
+  $('items').innerHTML=its.map((it,i)=>`<span class="item ${i===P.item?'on':''}" onclick="P.item=${i};render()"><span class="kbadge ${it.k}">${it.k==='A'?'그림':'판'}</span>${it.n}</span>`).join('')+`<span class="item"><span class="add">＋ 아이템 추가</span></span>`;
+  const cap=$('cap');const capT={2:['아이템','제품을 고르면 판과 그림 자리가 자동으로 생겨요. 아래에서 골라 하나씩 만져요.'],3:[cur.k==='B'?'판':'칼선',cur.k==='B'?'판은 규격이나 가이드에서 칼선이 정해져요. 그림은 안쪽에 배치.':'그림 아이템은 지금처럼 알파에서 칼선을 계산해요.'],4:['부품','맞물리는 자리(슬롯·타공·모듈)는 짝이 되는 판과 값이 묶여 있어요.'],5:['화이트','판마다 규칙이 달라요 — 뒷면 전체, 창 제외, 없음.'],6:['저장','두께가 다른 판은 인쇄소가 따로 받아서 파일이 나뉘어요.']}[P.step];
+  if(capT){cap.style.display='block';cap.innerHTML=`<b>${capT[0]}</b>${capT[1]}`;}else cap.style.display='none';
+}
+render();
+</script>
+</body>
+</html>

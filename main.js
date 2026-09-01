@@ -60,17 +60,29 @@ app.on('child-process-gone', (e, details) => {
 });
 
 let win = null;
+try {
+  require('electron').ipcMain.on('moa:titlebar', (e, o) => {
+    try { if (win && !win.isDestroyed() && process.platform !== 'darwin' && win.setTitleBarOverlay) win.setTitleBarOverlay({ color: o.color, symbolColor: o.symbol }); } catch (err) {}
+  });
+} catch (e) {}
 
 function createWindow() {
   blog('createWindow 진입');
   const iconPath = path.join(__dirname, 'build', 'icon.png');
+  // 처음 크기: 작업 영역의 92% (최대 1680×1050). 전체화면은 아니지만 넉넉하게
+  let W = 1680, H = 1050;
+  try { const a = require('electron').screen.getPrimaryDisplay().workAreaSize; W = Math.min(1680, Math.round(a.width * 0.92)); H = Math.min(1050, Math.round(a.height * 0.92)); } catch (e) {}
+  const isMac = process.platform === 'darwin';
   const winOpts = {
-    width: 1180, height: 820, minWidth: 720, minHeight: 600,
-    backgroundColor: '#fff7f9',
+    width: W, height: H, minWidth: 1100, minHeight: 700,
+    backgroundColor: '#f6f6f8',
     title: '모아 굿즈메이커',
     autoHideMenuBar: true,
     show: false, // ready-to-show에서 명시적으로 표시 (흰 화면·유령 창 방지)
-    webPreferences: { contextIsolation: true }
+    // 커스텀 제목 표시줄: 페이지 상단 38px 를 앱이 그리고, 창 버튼(최소화·최대화·닫기)만 OS 가 겹쳐 그린다
+    titleBarStyle: isMac ? 'hiddenInset' : 'hidden',
+    ...(isMac ? { trafficLightPosition: { x: 14, y: 12 } } : { titleBarOverlay: { color: '#ffffff', symbolColor: '#1f1f24', height: 38 } }),
+    webPreferences: { contextIsolation: true, preload: path.join(__dirname, 'preload.js') }
   };
   try { if (fs.existsSync(iconPath) && process.platform !== 'darwin') winOpts.icon = iconPath; } catch (e) {}
   win = new BrowserWindow(winOpts);

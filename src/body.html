@@ -1,0 +1,317 @@
+<script src="ag-psd.js"></script>
+<script src="jszip.js"></script>
+<script src="jspdf.js"></script>
+</head>
+<body>
+<div class="titlebar" id="titlebar">
+  <span class="tb-name"><img src="../build/icon.png" alt="" onerror="this.style.display='none'"> <b>모아 굿즈메이커</b></span>
+  <span class="tb-sp"></span>
+</div>
+<div class="settings hide" id="settingsPanel">
+  <h3 data-i18n>설정</h3>
+  <label class="row"><span data-i18n>포인트 컬러</span>
+    <span class="theme-swatches">
+      <button data-theme="" style="background:#ff3d8a" title="핑크"></button>
+      <button data-theme="blue" style="background:#3b82f6" title="블루"></button>
+      <button data-theme="purple" style="background:#8b5cf6" title="퍼플"></button>
+      <button data-theme="green" style="background:#10b981" title="그린"></button>
+      <button data-theme="orange" style="background:#f59e0b" title="오렌지"></button>
+    </span>
+  </label>
+  <label class="row"><span data-i18n>언어</span>
+    <select id="langSel"><option value="ko">한국어</option><option value="en">English</option><option value="ja">日本語</option><option value="zh">中文(简体)</option></select>
+  </label>
+</div>
+
+<div class="wrap">
+  <aside class="panel" id="panelLeft">
+    <div class="tabs" id="tabs">
+      <button data-tab="t1" class="on">① 시작</button>
+      <button data-tab="t2">② 칼선</button>
+      <button data-tab="t3">③ 부속</button>
+      <button data-tab="t4">④ 저장</button>
+    </div>
+
+    <!-- ① 시작 -->
+    <div class="tabpage on" id="t1">
+      <div class="grp">
+        <h3>이미지</h3>
+        <input type="file" id="file" accept="image/*" hidden>
+        <button class="btn primary" id="pick">이미지 불러오기</button>
+        <div class="info" id="sizeInfo" style="margin-top:10px;display:none"></div>
+        <div id="sizeCtrl" style="display:none;margin-top:8px">
+          <label class="row">그림 실물 폭(mm) <span class="tip" data-tip="투명을 뺀 그림 영역의 목표 실물 크기예요. 값을 바꾸면 해상도(DPI)가 자동 역산돼 모든 출력에 반영돼요. 픽셀은 그대로라 화질 손실이 없어요.">?</span> <input type="number" id="targetW" min="5" max="1000" step="0.1" style="width:76px"></label>
+          <label class="row">그림 실물 높이(mm) <input type="number" id="targetH" min="5" max="1000" step="0.1" style="width:76px"></label>
+          <label class="row">해상도(DPI) <input type="number" id="dpi" value="300" min="72" max="1200"> <select id="dpiPreset" style="width:74px"><option value="">직접</option><option>300</option><option>350</option><option>400</option><option>600</option></select></label>
+          <label class="row">그림 회전(°) <span class="tip" data-tip="원본을 돌려요. 칼선·화이트·타공이 전부 같이 따라와요. 90/180/270°는 픽셀을 다시 계산하지 않아 원본과 완전히 같고, 그 밖의 각도는 외곽 1px 정도만 다시 그려져요. 각도를 바꿀 때마다 항상 원본에서 새로 돌리니 여러 번 돌려도 화질이 나빠지지 않아요.">?</span> <input type="number" id="rot" value="0" min="-180" max="180" step="0.5" style="width:72px"></label>
+          <input type="range" id="rotSl" min="-180" max="180" value="0" step="0.5">
+          <div class="row" style="gap:6px;margin-top:4px">
+            <button class="btn ghost" id="rotL">↺ 90°</button>
+            <button class="btn ghost" id="rotR">↻ 90°</button>
+            <button class="btn ghost" id="rotZero">0°</button>
+          </div>
+          <label class="row"><span data-i18n>대지 크기 지정</span> <span class="tip" data-tip="문서(캔버스) 크기를 주문 사이즈로 정확히 고정해요. 인쇄소가 '대지 사이즈는 주문 사이즈와 동일하게'를 요구할 때 켜세요. PDF 페이지·PSD 캔버스·PNG가 전부 이 크기로 나가요. 그림은 가운데 배치되고 드래그로 옮길 수 있어요.">?</span> <input type="checkbox" id="boardOn"></label>
+          <div id="boardRow" style="display:none">
+            <label class="row">대지 폭(mm) <input type="number" id="boardW" min="10" max="1000" step="0.5" value="50" style="width:76px"></label>
+            <label class="row">대지 높이(mm) <input type="number" id="boardH" min="10" max="1000" step="0.5" value="50" style="width:76px"></label>
+            <button class="btn ghost" id="boardCenter" style="margin:4px 0">그림 가운데로</button>
+            <div class="hint">그림을 드래그해서 대지 안에서 옮길 수 있어요. 스탠드는 지정한 대지가 <b>본체(세우는 판)</b> 크기가 되고, 받침은 그 아래에 따로 붙어요.</div>
+            <div class="warn" id="boardWarn" style="display:none">대지가 작아서 칼선·부속이 잘릴 수 있어요. 대지를 키우거나 그림 실물 크기를 줄여보세요.</div>
+          </div>
+        </div>
+        <div class="warn" id="opaqueWarn">투명 영역이 거의 없어요. ② 칼선 탭에서 <b>배경 제거</b>를 <b>흰 배경</b>으로 바꿔보세요.</div>
+      </div>
+      <div class="grp">
+        <h3>굿즈 타입</h3>
+        <div class="types" id="types">
+          <button data-t="sticker"><b>✄</b>스티커</button>
+          <button data-t="sheet"><b>⠿</b>스티커 시트</button>
+          <button data-t="ring_hole" class="on"><b>◎</b>키링 · 구멍</button>
+          <button data-t="ring_tab"><b>♲</b>키링 · 고리</button>
+          <button data-t="stand"><b>ᐃ</b>스탠드 · 받침 포함</button>
+          <button data-t="stand" data-nb="1"><b>ᐞ</b>스탠드 · 받침 없이</button>
+          <button data-t="korotto"><b>●</b>코롯토</button>
+          <button data-t="acrylic"><b>◇</b>일반 아크릴</button>
+        </div>
+        <div class="hint" id="typeHint">디자인에 직접 타공 구멍을 뚫어요.</div>
+      </div>
+    </div>
+
+    <!-- ② 칼선 -->
+    <div class="tabpage" id="t2">
+      <div class="grp">
+        <h3>칼선</h3>
+        <label class="row">여백(mm) <span class="tip" data-tip="칼선과 그림 사이 거리. 마이너스로 내리면 그림 안쪽으로 파고들어요 (풀컷 스티커용 — 흰 테두리 없이 가장자리까지 인쇄).">?</span> <span class="v" id="offV">3.0</span></label>
+        <input type="range" id="offset" min="-5" max="10" value="3" step="0.5">
+        <label class="row">둥글리기 <span class="tip" data-tip="4~5단계는 머리카락 자락 같은 잔굴곡을 무시하고 큰 흐름으로 일정하게 감싸요.">?</span> <span class="v" id="smV">보통</span></label>
+        <input type="range" id="smooth" min="0" max="5" value="1" step="1">
+        <label class="row">칼선 색 <input type="color" id="cutcol" value="#ec008c"></label>
+        <label class="row">선 두께(mm) <input type="number" id="cutw" value="0.3" min="0.1" max="2" step="0.1"></label>
+        <label class="row">꼭지점 둥글리기(mm) <span class="tip" data-tip="칼선의 뾰족한 꼭지점(안쪽 V홈·바깥 뾰족점)을 지정 반경 이상으로 둥글려요. 인쇄소 칼날은 보통 0.5~1mm보다 급한 곡률을 못 따라가서, 발주 전에 0.5~1.0으로 켜두면 안전해요. 둥글리기(선 다듬기)와 별개로 꼭지점만 정리해요.">?</span> <span class="v" id="cornerRoundV">0.0</span></label>
+        <input type="range" id="cornerRound" min="0" max="2" value="0" step="0.1">
+        <button class="btn ghost" id="anchorMinBtn" style="margin-top:8px">⚓ 앵커 수 최소화</button>
+        <label class="row" style="margin-top:6px"><span data-i18n>앵커 미리보기</span> <span class="tip" data-tip="내보내기와 동일한 곡선 위에 앵커 점을 표시해요. 원=부드러운 앵커, 사각형=각진 코너. 인쇄소에 보내기 전 앵커 수·분포를 눈으로 확인할 수 있어요.">?</span> <input type="checkbox" id="showAnchors"></label>
+        <div class="hint" id="anchorInfo" style="text-align:center">칼선 앵커 —</div>
+      </div>
+      <div class="grp">
+        <h3>인식 기준</h3>
+        <label class="row">배경 제거
+          <select id="bgmode"><option value="alpha">투명(알파)</option><option value="white">흰 배경</option></select>
+        </label>
+        <label class="row">감도 <span class="tip" data-tip="어디까지를 '그림'으로 볼지 정해요. 흐린 그림자·잔픽셀이 칼선에 잡히면 값을 올려보세요.">?</span> <span class="v" id="thV">128</span></label>
+        <input type="range" id="thresh" min="1" max="254" value="128">
+      </div>
+      <div class="grp">
+        <h3>틈 · 구멍 다듬기</h3>
+        <label class="toggle"><input type="checkbox" id="fillHoles"> 내부 구멍 메우기 <span class="tip" data-tip="팔다리가 겹치며 생긴 갇힌 틈을 메워 안쪽 칼선을 없애요. 기준보다 큰 진짜 구멍(도넛 등)은 남아요. 참고: 1×1cm 틈 = 100mm².">?</span></label>
+        <div class="row" style="margin-top:8px"><span>구멍 크기 기준(mm²)</span><input type="number" id="fillHolesMax" value="100" min="1" max="3000" step="10"></div>
+        <label class="row" style="margin-top:10px">틈 좁히기(mm) <span class="tip" data-tip="머리카락·팔 사이처럼 밖으로 뚫린 좁은 홈을 메워요. 이 폭보다 좁은 틈이 사라져요.">?</span> <span class="v" id="gapCloseV">0</span></label>
+        <input type="range" id="gapClose" min="0" max="10" value="0" step="0.5">
+      </div>
+    </div>
+
+    <!-- ③ 부속 -->
+    <div class="tabpage" id="t3">
+      <div class="grp" id="holeGroup">
+        <h3>타공 <span class="tip" data-tip="드래그로 옮기고, Shift+클릭으로 여러 개 선택해 한 번에 옮길 수 있어요. 빨간 테두리는 칼선에 너무 가깝다는 뜻.">?</span></h3>
+        <label class="row">지름(mm) <span class="v" id="hdV">4.0</span></label>
+        <input type="range" id="hd" min="1.5" max="8" value="4" step="0.5">
+        <div class="row" id="wallRow"><span>고리 벽 두께(mm)</span><input type="number" id="wall" value="3" min="1" max="8" step="0.5"></div>
+        <button class="btn ghost" id="holeAuto" style="margin-top:6px">자동 위치로</button>
+        <button class="btn ghost hide" id="earAuto" style="margin-top:6px">고리 자동 위치로</button>
+      </div>
+      <div class="grp hide" id="korottoGroup">
+        <h3>코롯토 <span class="tip" data-tip="하단을 이만큼 평평하고 두툼하게 만들어 받침 없이 그 자체로 서요. 좁으면 잘 넘어져요. 오뚝이는 바닥을 둥글게 깎아 흔들리다 제자리로 돌아와요.">?</span></h3>
+        <label class="row"><span data-i18n>바닥 형태</span>
+          <select id="korottoMode"><option value="flat">일반 (평평한 바닥)</option><option value="roly">오뚝이 (둥근 바닥)</option></select>
+        </label>
+        <label class="row">바닥 평평하게(mm) <span class="v" id="korottoFlatV">8</span></label>
+        <input type="range" id="korottoFlat" min="2" max="30" value="8" step="1">
+        <div id="korottoRadBox">
+          <label class="row">바닥 모서리 라운드(mm) <span class="v" id="korottoRadV">2.0</span></label>
+          <input type="range" id="korottoRad" min="0" max="8" value="2" step="0.5">
+        </div>
+        <div id="rolyBox" class="hide">
+          <label class="row">흔들림 세기 <span class="tip" data-tip="세게 두면 바닥 곡률이 무게중심에 가까워져 더 크고 느리게 흔들려요. 약하게 두면 금방 멈추고 안정적이에요. 반지름은 무게중심에서 자동으로 역산해요.">?</span> <span class="v" id="rolySwayV">5</span></label>
+          <input type="range" id="rolySway" min="1" max="10" value="5" step="1">
+          <label class="row"><span data-i18n>바닥 반지름 직접 지정</span> <input type="checkbox" id="rolyManual"></label>
+          <label class="row hide" id="rolyRRow">바닥 반지름(mm) <input type="number" id="rolyR" value="52" min="10" max="600" step="1"></label>
+          <div class="hint" id="rolyStat"></div>
+          <button class="btn ghost hide" id="rolyFix" style="margin-top:6px">⚡ 자동 보정</button>
+        </div>
+      </div>
+      <div class="grp hide" id="standGroup">
+        <h3>스탠드 지지대 <span class="tip" data-tip="위로 드래그하면 엉덩이·몸통 쪽까지 촉을 끌어올릴 수 있어요. 인원이 여럿이면 Shift+클릭으로 여러 촉을 선택해 같이 옮겨요. 안 이어지면 빨갛게 표시돼요.">?</span></h3>
+        <button class="btn ghost" id="tabMoveBtn">🖐 드래그로 촉 위치 옮기기</button>
+        <button class="btn ghost" id="tabAuto">자동 위치로</button>
+        <label class="row" style="margin-top:10px">촉 너비(mm) <input type="number" id="tabW" value="15" min="4" max="60" step="1"></label>
+        <label class="row">촉 높이(mm) <input type="number" id="tabH" value="8" min="3" max="30" step="1"></label>
+        <label class="row" style="margin-top:10px">받침 만드는 방법 <span class="tip" data-tip="도형: 사각형·타원 받침을 자동으로 만들어요. 별도 이미지: 받침 그림을 따로 올려 그 실루엣으로 만들어요 (받침에도 그림이 인쇄돼요). 그림에서 잘라내기: 지금 그림에 받침을 떨어뜨려 같이 그려둔 경우 그 조각을 씁니다."></span>
+          <select id="baseSrc"><option value="shape">도형 자동 생성</option><option value="upload">별도 이미지 올리기</option><option value="art">지금 그림에서 잘라내기</option></select>
+        </label>
+        <div id="baseUpBox" class="hide">
+          <input type="file" id="baseImgFile" accept="image/*" hidden>
+          <button class="btn ghost" id="baseImgPick">🖼 받침 그림 올리기</button>
+          <button class="btn ghost hide" id="baseImgClear">✕ 받침 그림 비우기</button>
+          <label class="row" id="baseUpWRow">받침 그림 폭(mm) <span class="tip" data-tip="올린 그림 전체의 가로 실물 크기예요. 그림에 투명 여백이 있으면 실제 아크릴 조각은 그보다 작아요 — 아래에 실측 크기가 표시돼요.">?</span> <input type="number" id="baseUpW" value="55" min="10" max="200" step="0.5"></label>
+          <div class="hint" id="baseUpNote"></div>
+        </div>
+        <div id="baseArtBox" class="hide">
+          <label class="row">받침 조각
+            <select id="basePick"><option value="auto">자동 인식</option></select>
+          </label>
+          <div class="hint" id="baseArtNote"></div>
+        </div>
+        <label class="toggle" id="baseSepRow"><input type="checkbox" id="baseSeparate"> 받침을 별도 대지로 저장 <span class="tip" data-tip="켜면 본체와 받침이 각각 자기 크기의 대지로 나가요. PDF는 페이지가 나뉘고, PNG·PSD는 본체/받침 파일이 따로 만들어져요. 인쇄소가 '대지=주문 사이즈'를 요구할 때 쓰세요. 끄면 지금처럼 한 대지 아래쪽에 받침이 붙어서 나가요."></span></label>
+        <label class="row" id="baseShapeRow">받침 모양
+          <select id="baseShape"><option value="rect">사각형</option><option value="ellipse">타원</option></select>
+        </label>
+        <label class="row" id="baseRadRow">받침 모서리 라운드(mm) <input type="number" id="baseRad" value="3" min="0" max="20" step="0.5"></label>
+        <label class="row" id="baseWRow">받침 폭(mm) <input type="number" id="baseW" value="55" min="15" max="140" step="1"></label>
+        <label class="row" id="baseHRow">받침 높이(mm) <input type="number" id="baseH" value="12" min="6" max="40" step="1"></label>
+        <label class="row">아크릴 두께(mm) <input type="number" id="acr" value="3" min="1" max="6" step="0.5"></label>
+        <label class="row">구멍 앞뒤(mm) <span class="tip" data-tip="받침 슬롯을 앞(−)/뒤(+)로 옮겨요. 미리보기에서 슬롯을 직접 위아래로 드래그하면 개별 조정도 돼요 (인원별 따로). 받침 벽이 얇아지지 않게 자동 제한.">?</span> <span class="v" id="slotOffV">0.0</span></label>
+        <input type="range" id="slotOff" min="-10" max="10" value="0" step="0.5">
+      </div>
+      <div class="grp" id="shapeGroup">
+        <h3>도형 추가 <span class="tip" data-tip="기존 칼선 위에 별도 색으로 얹히는 규격선 (집게·자석·뱃지용). SVG·PSD에도 별도로 나가요.">?</span></h3>
+        <label class="toggle"><input type="checkbox" id="shapeOn"> 도형 칼선 표시</label>
+        <div id="shapeControls" class="hide">
+          <label class="row" style="margin-top:10px">프리셋
+            <select id="shapePreset">
+              <option value="custom">직접 설정</option>
+              <option value="clip_normal">집게 · 일반형 (⌀32)</option>
+              <option value="clip_wide">집게 · 와이드형 (55×32)</option>
+              <option value="clip_magnet">자석형 (⌀40)</option>
+            </select>
+          </label>
+          <label class="row">모양
+            <select id="shapeKind"><option value="circle">원</option><option value="ellipse">타원</option><option value="rrect">둥근 사각형</option><option value="rect">사각형</option></select>
+          </label>
+          <label class="row">가로(mm) <input type="number" id="shapeW" value="32" min="5" max="200" step="1"></label>
+          <label class="row">세로(mm) <input type="number" id="shapeH" value="32" min="5" max="200" step="1"></label>
+          <label class="row" id="shapeRadRow">모서리 반경(mm) <input type="number" id="shapeR" value="4" min="0" max="30" step="0.5"></label>
+          <label class="row">도형 선 색 <input type="color" id="shapeCol" value="#0066ff"></label>
+          <button class="btn ghost" id="shapeMoveBtn">🖐 드래그로 도형 옮기기</button>
+          <button class="btn ghost" id="shapeCenter">그림 중앙으로</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ④ 저장 -->
+    <div class="tabpage" id="t4">
+      <div class="grp">
+        <h3><span id="whiteTitle">화이트 레이어</span> <span class="tip" data-tip="아크릴은 투명해 뒤가 비쳐요. 그림과 같은 모양의 흰 잉크 밑판을 인쇄소에 요청할 때 써요. 스티커에선 대지(받침 종이) 영역이 돼요. PSD·PNG는 아래 레이어 색, PDF는 표시색으로 나가요.">?</span></h3>
+        <label class="toggle"><input type="checkbox" id="whiteLayer"> <span id="whiteToggleTxt">화이트 레이어 추가</span></label>
+        <div id="whiteOpts" style="display:none">
+        <label class="row"><span data-i18n>화이트 미리보기</span> <span class="tip" data-tip="화이트(백판)가 깔리는 영역을 캔버스 위에 반투명으로 표시해요. 여백·형식 조절 결과를 내보내기 전에 확인할 수 있어요.">?</span> <input type="checkbox" id="whitePreview"></label>
+        <label class="row">화이트 형식 <span class="tip" data-tip="자동: 화이트가 단색이면 벡터 패스와 이미지 레이어를 함께 담아요(PSD·PDF). 래스터: 항상 이미지로만. 벡터: 벡터 패스를 우선하고 칼선 SVG에도 화이트 패스를 함께 담아요 — 그라데이션·컬러 대지는 벡터로 표현할 수 없어 이미지로 대체돼요.">?</span>
+          <select id="whiteFormat" style="width:130px">
+            <option value="auto">자동</option>
+            <option value="raster">래스터(이미지)</option>
+            <option value="vector">벡터(패스)</option>
+          </select></label>
+        <label class="row" id="whiteSimplifyRow">벡터 단순화 <span class="tip" data-tip="화이트 벡터 패스의 앵커 수준이에요. 정밀은 칼선과 같은 기준, 단순은 앵커를 더 줄여요(화이트는 잉크가 덮으니 살짝 단순해도 무방).">?</span>
+          <select id="whiteSimplify" style="width:100px">
+            <option value="fine">정밀</option>
+            <option value="simple">단순</option>
+          </select></label>
+        <div class="hint" id="whiteSimplifyNote" style="display:none">굿즈가 커서(10cm 초과) 단순화를 자동으로 끄고 정밀로 처리했어요 — 큰 굿즈에선 단순화 오차가 눈에 띄어요.</div>
+        <div class="hint" id="whiteFitNote"></div>
+        <label class="row" style="margin-top:8px"><span id="whiteOffLabel">화이트 여백(mm)</span> <span class="tip" data-tip="+는 실루엣보다 크게, −는 안쪽으로 죄어요. 아크릴 화이트는 −0.1~−0.3으로 흰끼 삐짐을 막고, 스티커 대지는 +2~+3으로 키우는 게 보통이에요. 0이면 원본 알파의 부드러운 가장자리가 유지돼요."> ?</span> <span class="v" id="whiteOffV">0.0</span></label>
+        <input type="range" id="whiteOff" min="-2" max="5" value="0" step="0.1">
+        <label class="row">레이어 색 <input type="color" id="whiteInkCol" value="#ffffff"></label>
+        <label class="row" id="whiteColRow">PDF 표시색 <input type="color" id="whiteCol" value="#00a0e9"></label>
+        </div>
+        <input type="file" id="whiteFile" accept="image/*" hidden>
+        <button class="btn ghost" id="whiteUpBtn">직접 만든 화이트 불러오기</button>
+        <div class="info hide" id="whiteUpRow" style="margin-top:6px;display:flex;align-items:center;gap:8px;justify-content:space-between">
+          <span id="whiteUpName" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
+          <button class="btn ghost" id="whiteUpClear" style="width:auto;padding:5px 10px;margin:0;flex:none">✕ 자동으로</button>
+        </div>
+          <div class="hint hide" id="whiteBgNote">배경은 대지 전체에 깔리고 스티커는 반칼, 대지 외곽만 완칼이에요. 배경 파일을 올리면 대지 크기가 파일 크기가 돼요. 투명 스티커로 여백을 비우려면 배경 인쇄를 끄세요.</div>
+        <div class="hint">기본은 원본 그림 모양 그대로 자동 생성돼요. 부분 화이트(홀로그램·글리터 연출 등)가 필요하면 직접 만든 PNG를 올리세요 — 불투명한 부분이 화이트로 인쇄돼요. 원본과 같은 크기 권장. 농도(그라데이션) 화이트는 자동으로 이미지로 내보내져요 — 인쇄소엔 래스터 접수가 표준이에요.</div>
+        <div class="hint">스티커·시트의 대지는 업로드한 색 그대로, 아크릴 계열의 화이트는 흰 잉크라 레이어 색으로 통일돼요.</div>
+      </div>
+      <div class="grp">
+        <h3>내보내기 <span class="tip" data-tip="PSD는 디자인/칼선(+화이트) 레이어로, PDF는 페이지별로 나뉘어요. 인쇄소 규격에 맞춰 칼선을 별색으로 바꿔 쓰기 좋아요.">?</span></h3>
+        <div class="sub-h" data-i18n>색상 옵션</div>
+        <div class="opt-box">
+          <label class="row">PSD 색상 <span class="tip" data-tip="PSD 문서의 색상 모드예요. 인쇄소가 'CMYK 문서로 주세요' 하면 CMYK를 선택하세요. 브라우저 한계로 ICC 프로파일 없는 단순 변환식(잉크값 계산)이라, 정밀 색 관리가 필요하면 포토샵에서 재변환하는 걸 권장해요. CMYK 모드에선 픽셀 레이어(디자인·칼선·화이트)만 담기고 벡터 패스는 SVG로 따로 받아 일러에서 얹으면 돼요.">?</span>
+            <select id="psdColorMode" style="width:140px">
+              <option value="rgb">RGB</option>
+              <option value="cmyk">CMYK (단순 변환)</option>
+            </select></label>
+          <label class="row">칼선 색상(PDF) <span class="tip" data-tip="PDF의 벡터 칼선 색 지정 방식이에요. 인쇄소가 'CMYK 마젠타 100%로 주세요' 하면 여기서 선택하세요. 디자인 이미지(래스터)는 브라우저 특성상 RGB로 저장되며, 대부분의 인쇄소가 자동 변환해요. PSD·SVG·PNG는 RGB예요.">?</span>
+            <select id="cutColorMode" style="width:140px">
+              <option value="rgb">RGB (화면 색)</option>
+              <option value="m100">CMYK 마젠타 100</option>
+              <option value="c100">CMYK 시안 100</option>
+              <option value="k100">CMYK 먹 100</option>
+            </select></label>
+        </div>
+        <div class="opt-box" id="multiExpRow" style="display:none">
+          <label class="row">여러 아이템 <span class="tip" data-tip="아이템이 여러 개일 때 파일을 어떻게 만들지예요. '한 대지에 모아서'는 모든 아이템을 한 장에 자동 배치해 한 파일로 내보내요. 대지 크기를 고정하면 그 크기에 맞춰요.">?</span>
+            <select id="multiExp" style="width:140px">
+              <option value="board">한 대지에 모아서</option>
+              <option value="each">현재 아이템만</option>
+            </select></label>
+          <label class="row">아이템 간격(mm) <input type="number" id="boardGap" min="0" max="20" step="0.5" value="3"></label>
+        </div>
+        <div class="sub-h" data-i18n>인쇄소 제출용 (레이어·벡터)</div>
+        <button class="btn primary" id="expPsd" disabled>PSD (레이어 분리)</button>
+        <button class="btn ghost" id="expPdf" disabled>PDF (페이지 분리)</button>
+        <button class="btn ghost" id="expSvg" disabled>칼선 SVG (벡터)</button>
+        <div class="sub-h" data-i18n>이미지 파일</div>
+        <button class="btn ghost" id="expZip" disabled>PNG 묶음 ZIP</button>
+        <button class="btn ghost" id="expPreview" disabled>미리보기 PNG</button>
+        <div class="warn" id="psdWarn"></div>
+        <div class="opt-box" id="dirBox" style="margin-top:10px">
+    <label class="row"><span data-i18n>저장 폴더</span><span class="v" id="dirName" data-i18n>미지정 (다운로드 폴더)</span></label>
+    <button class="btn ghost" id="dirPick" data-i18n>저장 폴더 지정</button>
+    <button class="btn ghost hide" id="dirClear" data-i18n>지정 해제</button>
+    <div class="hint" data-i18n>지정하면 모든 내보내기가 그 폴더에 바로 저장돼요. (Chrome·Edge 지원)</div>
+        </div>
+      </div>
+      <div class="grp">
+        <h3>여러 장 한번에 <span class="tip" data-tip="지금 설정 그대로 여러 이미지를 일괄로 따서, 이미지별 디자인/칼선/SVG(+화이트)를 ZIP 하나로 받아요.">?</span></h3>
+        <input type="file" id="batchFiles" accept="image/*" multiple hidden>
+        <button class="btn ghost" id="batchPick">이미지 여러 개 선택 → ZIP</button>
+        <div class="info" id="batchStatus" style="display:none;margin-top:8px"></div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="stage">
+    <div class="drop" id="drop"><b>여기에 이미지를 끌어다 놓기</b>또는 클릭해서 불러오기 · 투명 PNG 권장</div>
+    <div class="stage-top" id="stageTop" style="display:none"></div>
+    <canvas id="view" style="display:none"></canvas>
+    <div class="info" id="stageInfo" style="display:none"></div>
+    <div class="items" id="itemBar" style="display:none"></div>
+  </main>
+</div>
+
+<div id="updBanner" style="display:none">
+  <span id="updMsg"></span>
+  <a id="updGo" href="#" target="_blank" rel="noopener" class="upd-btn">받으러 가기</a>
+  <button id="updLater" class="upd-x" title="나중에">✕</button>
+</div>
+<footer class="credit"><span style="opacity:.55">모아 굿즈메이커 v2.0.0</span> · 오픈소스 고지: CREDITS.md · © 2026 Modi · X <a href="https://x.com/Modi_ing" target="_blank" rel="noopener">@Modi_ing</a> · 문의 <a href="mailto:1000sbin@gmail.com">1000sbin@gmail.com</a></footer>
+<span class="spin" id="spin">🍓 칼선 계산 중…</span>
+<div class="modal-bg" id="shapeModalBg">
+  <div class="modal">
+    <h3>도형 크기 정하기</h3>
+    <p>어떤 규격으로 만들까요? 나중에 ③ 부속 탭에서 언제든 바꿀 수 있어요.</p>
+    <div class="preset-list">
+      <button data-preset="clip_normal"><span><b>집게 · 일반형</b><br>원형</span><span>⌀32mm</span></button>
+      <button data-preset="clip_wide"><span><b>집게 · 와이드형</b><br>둥근 사각형</span><span>55×32mm</span></button>
+      <button data-preset="clip_magnet"><span><b>자석형</b><br>원형</span><span>⌀40mm</span></button>
+    </div>
+    <div class="custom-row">
+      <select id="mShapeKind"><option value="circle">원</option><option value="ellipse">타원</option><option value="rrect">둥근 사각형</option><option value="rect">사각형</option></select>
+      <input type="number" id="mShapeW" value="32" min="10" max="200"> ×
+      <input type="number" id="mShapeH" value="32" min="10" max="200"> mm
+      <button class="btn primary" id="mShapeApply" style="width:auto;padding:8px 16px;margin:0">적용</button>
+    </div>
+  </div>
+</div>
